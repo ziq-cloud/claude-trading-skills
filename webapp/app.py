@@ -31,7 +31,16 @@ lang.selector()
 
 
 def page(fn, key, icon, default=False):
-    return st.Page(fn, title=t(f"nav.{key}"), icon=icon, url_path=key, default=default)
+    # The default page is served at "/", so it must not get its own url_path.
+    p = st.Page(
+        fn,
+        title=t(f"nav.{key}"),
+        icon=icon,
+        default=default,
+        **({} if default else {"url_path": key}),
+    )
+    nav.PAGES[key] = p
+    return p
 
 
 sections = {
@@ -48,7 +57,6 @@ sections = {
         page(catalog_page.render, "catalog", "📚"),
     ],
 }
-nav.PAGES.update({p.url_path: p for group in sections.values() for p in group})
 navigation = st.navigation(sections)
 
 level, info, _, _ = level_info()

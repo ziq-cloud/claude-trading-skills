@@ -658,6 +658,8 @@ STRINGS: dict[str, dict] = {
         "சென்ட் (USC): 10,000 – 1,000,000 சென்ட்கள்",
         "美分账户 (USC)：10,000 – 1,000,000 美分",
     ),
+    "demo.short.standard": L("Standard (USD)", "Standard (USD)", "நிலையான (USD)", "标准账户 (USD)"),
+    "demo.short.cent": L("Cent (USC)", "Cent (USC)", "சென்ட் (USC)", "美分账户 (USC)"),
     "demo.cent_help": L(
         "1 USD = 100 US cents (USC). A cent account shows balances in cents: 100,000 USC = $1,000.",
         "1 USD = 100 sen AS (USC). Akaun cent memaparkan baki dalam sen: 100,000 USC = $1,000.",

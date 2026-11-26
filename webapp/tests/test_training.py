@@ -138,8 +138,9 @@ def test_money_formatting():
     cent = demo_account.new_account(10_000, "cent")
     assert demo_account.fmt_money(std, 1234.5) == "$1,234.50"
     assert demo_account.fmt_money(std, -5) == "-$5.00"
-    assert demo_account.fmt_money(cent, 12.345) == "1,234.50 USC"
-    assert demo_account.fmt_money(cent, -0.5) == "-50.00 USC"
+    assert demo_account.fmt_money(cent, 12.345) == "1,234 USC"
+    assert demo_account.fmt_money(cent, -0.5) == "-50 USC"
+    assert demo_account.fmt_money(cent, 0.004) == "0 USC"
     assert demo_account.fmt_money(std, -0.001) == "$0.00"
 
 

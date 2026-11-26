@@ -61,12 +61,11 @@ def new_account(starting_balance: float, account_type: str = "standard") -> dict
 def fmt_money(acct: dict, usd: float) -> str:
     per_usd = ACCOUNT_TYPES[acct.get("account_type", "standard")][2]
     value = usd * per_usd
-    if abs(value) < 0.005:
-        value = 0.0
-    sign = "-" if value < 0 else ""
     if per_usd == 1:
-        return f"{sign}${abs(value):,.2f}"
-    return f"{sign}{abs(value):,.2f} USC"
+        value = round(value, 2)
+        return f"{'-' if value < 0 else ''}${abs(value):,.2f}"
+    value = round(value)  # cents are the smallest unit
+    return f"{'-' if value < 0 else ''}{abs(value):,} USC"
 
 
 def fmt_shares(shares: float) -> str:
@@ -151,7 +150,7 @@ def close_trade(acct: dict, trade_id: str, price: float, date: str, reason: str)
     pnl = (price - t["entry"]) * t["shares"]
     closed = {
         **t,
-        "exit_price": float(price),
+        "exit_price": round(float(price), 4),
         "exit_date": str(date),
         "exit_reason": reason,
         "pnl": round(pnl, 4),

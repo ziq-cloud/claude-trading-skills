@@ -4,6 +4,24 @@ A Streamlit app that takes a trader from zero to an advanced, rule-based process
 with virtual money first. The tool pages call the same Python code the Claude skills
 use, so the numbers match the CLI output.
 
+## Languages
+
+English, Bahasa Melayu, தமிழ் (Tamil) and 中文 (Simplified Chinese). Pick one in the
+sidebar; it is kept in the `?lang=` URL parameter (`en`, `ms`, `ta`, `zh`). All strings live
+in `core/i18n.py`, and `tests/test_i18n.py` fails if a key is missing a language or its
+placeholders differ. Output produced by the skills themselves (breadth signals, catalog
+descriptions, the position-sizer markdown report) stays in English.
+
+## Demo account types
+
+| Type | Balance options | Display |
+|------|-----------------|---------|
+| Standard | $100 – $1,000 USD | `$1,000.00` |
+| Cent | 10,000 – 1,000,000 USC ($100 – $10,000) | `100,000 USC` |
+
+Fractional shares (up to 4 decimals) are allowed so small balances can trade high-priced
+stocks. Amounts are stored in USD; a cent account only displays them ×100.
+
 ## Training (zero → advanced)
 
 | Level | Focus | Unlocks when | Max risk / demo trade |

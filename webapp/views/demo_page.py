@@ -76,17 +76,18 @@ def render():
     st.markdown(
         t(
             "demo.acct",
-            type=t(f"demo.type.{acct['account_type']}").split(":")[0],
+            type=t(f"demo.short.{acct['account_type']}"),
             start=money(acct["starting_balance"]),
         )
     )
     change = (eq / acct["starting_balance"] - 1) * 100
-    m = st.columns(5)
+    m = st.columns(2)
     m[0].metric(t("demo.m_equity"), money(eq), f"{change:+.2f}%" if abs(change) >= 0.005 else None)
     m[1].metric(t("demo.m_cash"), money(acct["cash"]))
-    m[2].metric(t("demo.m_closed"), stats["trades"])
-    m[3].metric(t("common.win_rate"), f"{stats['win_rate']:.0%}" if has else "—")
-    m[4].metric(t("common.expectancy"), f"{stats['expectancy_r']:+.2f}R" if has else "—")
+    m = st.columns(3)
+    m[0].metric(t("demo.m_closed"), stats["trades"])
+    m[1].metric(t("common.win_rate"), f"{stats['win_rate']:.0%}" if has else "—")
+    m[2].metric(t("common.expectancy"), f"{stats['expectancy_r']:+.2f}R" if has else "—")
 
     tab_new, tab_open, tab_journal = st.tabs(
         [
