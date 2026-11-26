@@ -4,6 +4,7 @@ from core import indicators, prices
 from plotly.subplots import make_subplots
 
 from views import nav
+from views.lang import t
 
 
 @st.cache_data(ttl=900, show_spinner=False)
@@ -11,41 +12,51 @@ def _load(symbol: str, source: str):
     return prices.fetch_daily(symbol, source)
 
 
-def render():
-    st.title("📊 Price Chart")
-    c1, c2, c3 = st.columns([2, 1, 1])
-    symbol = c1.text_input("Ticker", value=st.session_state.get("chart_symbol", "AAPL"))
-    source = c2.selectbox("Data source", ["auto", "twelvedata", "yfinance"])
-    lookback = c3.selectbox(
-        "Show last", [60, 120, 250, 500], index=2, format_func=lambda n: f"{n} days"
-    )
+def _fmt(v, nd=2):
+    return "—" if v != v else f"{v:,.{nd}f}"  # NaN check
 
+
+def _vs(price, ref):
+    return None if ref != ref else t("chart.vs", pct=f"{(price / ref - 1) * 100:+.1f}")
+
+
+def render():
+    st.title("📊 " + t("nav.chart"))
+    c1, c2, c3 = st.columns([2, 1, 1])
+    symbol = c1.text_input(t("common.ticker"), value=st.session_state.get("chart_symbol", "AAPL"))
+    source = c2.selectbox(t("chart.source"), ["auto", "twelvedata", "yfinance"])
+    lookback = c3.selectbox(
+        t("chart.show_last"),
+        [60, 120, 250, 500],
+        index=2,
+        format_func=lambda n: t("chart.days", n=n),
+    )
     try:
-        df, used = _load(prices.clean_symbol(symbol), source)
+        sym = prices.clean_symbol(symbol)
+        df, used = _load(sym, source)
     except ValueError as exc:
         st.error(str(exc))
         return
-    except prices.PriceDataError as exc:
-        st.error(f"Could not load prices: {exc}")
-        st.caption("Set TWELVEDATA_API_KEY, or install yfinance, then try again.")
+    except prices.PriceDataError:
+        st.error(t("common.price_error"))
         return
 
-    sym = prices.clean_symbol(symbol)
     st.session_state["chart_symbol"] = sym
     df = indicators.add_indicators(df)
     view = df.tail(lookback)
     last, prev = df.iloc[-1], df.iloc[-2]
-    chg = (last.close / prev.close - 1) * 100
 
     m = st.columns(5)
-    m[0].metric("Close", f"{last.close:,.2f}", f"{chg:+.2f}%")
+    m[0].metric(
+        t("chart.close"), f"{last.close:,.2f}", f"{(last.close / prev.close - 1) * 100:+.2f}%"
+    )
     m[1].metric("SMA 50", _fmt(last.sma_50), _vs(last.close, last.sma_50))
     m[2].metric("SMA 200", _fmt(last.sma_200), _vs(last.close, last.sma_200))
     m[3].metric("RSI 14", _fmt(last.rsi_14, 1))
     m[4].metric(
         "ATR 14",
         _fmt(last.atr_14),
-        f"{last.atr_14 / last.close * 100:.2f}% of price",
+        t("chart.atr_pct", pct=f"{last.atr_14 / last.close * 100:.2f}"),
         delta_color="off",
     )
 
@@ -68,7 +79,9 @@ def render():
             col=1,
         )
     fig.add_trace(
-        go.Bar(x=view.index, y=view.volume, name="Volume", marker_color="#8899aa"), row=2, col=1
+        go.Bar(x=view.index, y=view.volume, name=t("chart.volume"), marker_color="#8899aa"),
+        row=2,
+        col=1,
     )
     fig.add_trace(
         go.Scatter(x=view.index, y=view.rsi_14, name="RSI 14", line=dict(color="#7d3c98")),
@@ -85,20 +98,12 @@ def render():
     )
     fig.update_xaxes(rangebreaks=[dict(bounds=["sat", "mon"])])
     st.plotly_chart(fig, use_container_width=True)
-    st.caption(f"Source: {used} · last bar {df.index[-1].date()}")
+    st.caption(t("chart.caption", src=used, date=df.index[-1].date()))
 
-    if st.button("🧮 Use this price and ATR in Position Sizer", type="primary"):
+    if st.button(t("chart.to_sizer"), type="primary"):
         st.session_state["sizer_prefill"] = {
             "symbol": sym,
             "entry": round(float(last.close), 2),
             "atr": round(float(last.atr_14), 2),
         }
         nav.go("sizer")
-
-
-def _fmt(v, nd=2):
-    return "—" if v != v else f"{v:,.{nd}f}"  # NaN check
-
-
-def _vs(price, ref):
-    return None if ref != ref else f"price {(price / ref - 1) * 100:+.1f}%"

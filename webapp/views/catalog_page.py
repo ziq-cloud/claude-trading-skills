@@ -1,6 +1,7 @@
 import streamlit as st
 from core import catalog
-from core.paths import SKILLS_DIR
+
+from views.lang import t
 
 
 @st.cache_data
@@ -9,34 +10,35 @@ def _skills():
 
 
 def render():
-    st.title("📚 Skill Catalog")
+    st.title("📚 " + t("nav.catalog"))
     skills = _skills()
-
-    c1, c2, c3 = st.columns([2, 2, 2])
-    query = c1.text_input("Search", placeholder="e.g. dividend, breakout, earnings")
+    c1, c2, c3 = st.columns(3)
+    query = c1.text_input(t("catalog.search"), placeholder=t("catalog.placeholder"))
     cats = c2.multiselect(
-        "Category", list(catalog.CATEGORY_LABELS), format_func=catalog.CATEGORY_LABELS.get
+        t("catalog.category"), list(catalog.CATEGORY_LABELS), format_func=lambda c: t(f"cat.{c}")
     )
     apis = c3.multiselect(
-        "API requirement", list(catalog.API_LEVEL_LABELS), format_func=catalog.API_LEVEL_LABELS.get
+        t("catalog.api"), list(catalog.API_LEVEL_LABELS), format_func=lambda a: t(f"api.{a}")
     )
-
     found = catalog.filter_skills(skills, query, set(cats) or None, set(apis) or None)
-    st.caption(f"{len(found)} of {len(skills)} skills")
+    st.caption(t("catalog.count", n=len(found), total=len(skills)))
 
     badge = {"none": "🟢", "optional": "🟡", "required": "🔴"}
     for s in found:
-        with st.expander(f"{badge[s.api_level]} **{s.display_name}** — {s.category_label}"):
+        with st.expander(f"{badge[s.api_level]} **{s.display_name}** — {t('cat.' + s.category)}"):
             st.write(s.summary)
             st.caption(
-                f"Status: {s.status} · Timeframe: {s.timeframe or '—'} · "
-                f"Difficulty: {s.difficulty or '—'} · {catalog.API_LEVEL_LABELS[s.api_level]}"
+                t(
+                    "catalog.meta",
+                    status=s.status,
+                    tf=s.timeframe or "—",
+                    diff=s.difficulty or "—",
+                    api=t(f"api.{s.api_level}"),
+                )
             )
             if s.integrations:
-                st.markdown("**Integrations**")
+                st.markdown(f"**{t('catalog.integrations')}**")
                 for i in s.integrations:
                     note = f" — {i['note']}" if i.get("note") else ""
                     st.markdown(f"- `{i.get('id')}` ({i.get('requirement', '?')}){note}")
-            skill_md = SKILLS_DIR / s.id / "SKILL.md"
-            if skill_md.exists():
-                st.caption(f"Definition: skills/{s.id}/SKILL.md")
+            st.caption(f"skills/{s.id}/SKILL.md")

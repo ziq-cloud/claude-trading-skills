@@ -2,79 +2,87 @@ import streamlit as st
 from core import training
 
 from views import nav
+from views.lang import t
 from views.state import level_info
 
 
 def render():
     level, info, progress, acct = level_info()
-    st.title("🎓 Learning Path")
-    st.write(
-        "Go from zero to an advanced, rule-based process. Each level unlocks by doing, "
-        "not by reading: pass the quiz, practise on historical charts, then prove it "
-        "on the demo account."
-    )
+    st.title("🎓 " + t("nav.learn"))
+    st.write(t("learn.intro"))
 
     cols = st.columns(4)
     for n, lv in training.LEVELS.items():
         with cols[n - 1].container(border=True):
             mark = "✅" if n < level else ("👉" if n == level else "🔒")
-            st.markdown(f"{mark} **Level {n}: {lv['name']}**")
-            st.caption(lv["goal"])
-            st.caption(f"Max risk/trade: **{lv['max_risk_pct']}%**")
+            st.markdown(f"{mark} **{t('side.level', n=n, name=t(f'level.{n}.name'))}**")
+            st.caption(t(f"level.{n}.goal"))
+            st.caption(t("learn.max_risk", pct=lv["max_risk_pct"]))
 
-    st.subheader("Your progress")
+    st.subheader(t("learn.progress"))
     replay = training.trade_stats(progress.replays)
     demo = training.trade_stats(acct["closed"] if acct else [])
+    passed = training.quiz_passed(progress.quiz_score)
     m = st.columns(4)
     m[0].metric(
-        "Quiz",
+        t("learn.m_quiz"),
         f"{progress.quiz_score}/{len(training.QUIZ)}",
-        "passed" if training.quiz_passed(progress.quiz_score) else "not passed",
-        delta_color="normal" if training.quiz_passed(progress.quiz_score) else "off",
+        t("learn.passed") if passed else t("learn.not_passed"),
+        delta_color="normal" if passed else "off",
     )
     m[1].metric(
-        "Replay trades",
+        t("learn.m_replays"),
         f"{replay['trades']}/{training.REPLAYS_FOR_LEVEL_3}",
-        f"{replay['expectancy_r']:+.2f}R avg" if replay["trades"] else None,
+        t("learn.avg_r", r=f"{replay['expectancy_r']:+.2f}") if replay["trades"] else None,
         delta_color="off",
     )
-    m[2].metric("Demo trades closed", f"{demo['trades']}/{training.DEMO_TRADES_FOR_LEVEL_4}")
-    m[3].metric("Demo expectancy", f"{demo['expectancy_r']:+.2f}R" if demo["trades"] else "—")
+    m[2].metric(t("learn.m_demo"), f"{demo['trades']}/{training.DEMO_TRADES_FOR_LEVEL_4}")
+    m[3].metric(t("learn.m_expect"), f"{demo['expectancy_r']:+.2f}R" if demo["trades"] else "—")
     if level < 4:
-        st.info(f"**Next step:** {info['unlock']}")
+        st.info(t("learn.next", unlock=info["unlock"]))
     else:
-        st.success("You've reached the top level. Keep journaling and reviewing.")
+        st.success(t("learn.top"))
 
-    st.subheader(f"Level {level} lessons: {info['name']}")
-    for title, body in info["lessons"]:
-        with st.expander(title):
-            st.markdown(body)
+    st.subheader(t("learn.lessons", n=level, name=info["name"]))
+    for lesson in info["lessons"]:
+        with st.expander(t(f"lesson.{lesson}.title")):
+            st.markdown(t(f"lesson.{lesson}.body"))
     if level > 1:
-        with st.expander("Review earlier levels"):
+        with st.expander(t("learn.review")):
             for n in range(1, level):
-                for title, body in training.LEVELS[n]["lessons"]:
-                    st.markdown(f"**L{n} · {title}** — {body}")
+                for lesson in training.LEVELS[n]["lessons"]:
+                    st.markdown(
+                        f"**L{n} · {t(f'lesson.{lesson}.title')}** — {t(f'lesson.{lesson}.body')}"
+                    )
 
-    st.subheader("Basics quiz")
+    st.subheader(t("learn.quiz"))
     with st.form("quiz_form"):
         answers = []
-        for i, q in enumerate(training.QUIZ):
-            choice = st.radio(f"{i + 1}. {q['q']}", q["options"], index=None, key=f"quiz_{i}")
-            answers.append(q["options"].index(choice) if choice is not None else -1)
-        if st.form_submit_button("Submit answers", type="primary"):
+        for i, _ in enumerate(training.QUIZ, start=1):
+            opts = t(f"quiz.{i}.opts")
+            choice = st.radio(
+                f"{i}. {t(f'quiz.{i}.q')}",
+                range(len(opts)),
+                index=None,
+                format_func=lambda k, o=opts: o[k],
+                key=f"quiz_{i}",
+            )
+            answers.append(-1 if choice is None else choice)
+        if st.form_submit_button(t("learn.submit"), type="primary"):
             score = training.grade_quiz(answers)
             progress.quiz_score = max(progress.quiz_score, score)
             training.save_progress(progress)
+            total = len(training.QUIZ)
             if training.quiz_passed(score):
-                st.success(f"{score}/{len(training.QUIZ)} — passed! Level 2 unlocked.")
+                st.success(t("learn.quiz_pass", score=score, total=total))
             else:
-                st.error(f"{score}/{len(training.QUIZ)} — review the lessons and try again.")
-                for q, a in zip(training.QUIZ, answers):
+                st.error(t("learn.quiz_fail", score=score, total=total))
+                for i, (q, a) in enumerate(zip(training.QUIZ, answers), start=1):
                     if a != q["answer"]:
-                        st.caption(f"✗ {q['q']} → **{q['options'][q['answer']]}**")
+                        st.caption(f"✗ {t(f'quiz.{i}.q')} → **{t(f'quiz.{i}.opts')[q['answer']]}**")
 
     c1, c2 = st.columns(2)
-    if c1.button("▶ Practise on Chart Replay", use_container_width=True):
+    if c1.button(t("learn.btn_replay"), use_container_width=True):
         nav.go("replay")
-    if c2.button("💼 Open Demo Account", use_container_width=True):
+    if c2.button(t("learn.btn_demo"), use_container_width=True):
         nav.go("demo")

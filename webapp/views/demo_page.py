@@ -4,13 +4,11 @@ from datetime import date
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
-from core import demo_account, indicators, prices, training
+from core import demo_account as da
+from core import indicators, prices, training
 
+from views.lang import t
 from views.state import level_info
-
-
-def _money(v: float) -> str:
-    return f"-${abs(v):,.2f}" if v < -0.005 else f"${abs(v):,.2f}"
 
 
 @st.cache_data(ttl=600, show_spinner=False)
@@ -20,79 +18,105 @@ def _bars(symbol):
 
 
 def _setup():
-    st.write("Start a paper-trading account with virtual money. Prices are real daily closes.")
-    with st.form("new_acct"):
-        bal = st.select_slider(
-            "Starting balance (virtual $)",
-            [1_000, 5_000, 10_000, 25_000, 50_000, 100_000],
-            value=10_000,
-        )
-        if st.form_submit_button("Create demo account", type="primary"):
-            demo_account.save(demo_account.new_account(bal))
-            st.rerun()
+    st.write(t("demo.setup"))
+    acct_type = st.radio(
+        t("demo.type"),
+        list(da.ACCOUNT_TYPES),
+        format_func=lambda k: t(f"demo.type.{k}"),
+        horizontal=True,
+    )
+    if acct_type == "cent":
+        st.caption(t("demo.cent_help"))
+    choices = da.ACCOUNT_TYPES[acct_type][3]
+    unit = "USC" if acct_type == "cent" else "USD"
+    bal = st.select_slider(
+        t("demo.balance"),
+        choices,
+        value=choices[len(choices) // 2],
+        format_func=lambda v: f"{v:,} {unit}" if unit == "USC" else f"${v:,}",
+    )
+    if st.button(t("demo.create"), type="primary"):
+        da.save(da.new_account(bal, acct_type))
+        st.rerun()
 
 
 def render():
     level, info, _, acct = level_info()
-    st.title("💼 Demo Account")
-    st.caption(
-        f"Level {level} · {info['name']} — max risk per trade **{info['max_risk_pct']}%**. "
-        "Long trades only. Every trade needs a stop-loss and a reason."
-    )
+    st.title("💼 " + t("nav.demo"))
+    st.caption(t("demo.caption", n=level, name=info["name"], pct=info["max_risk_pct"]))
     if acct is None:
         _setup()
         return
+    money = lambda usd: da.fmt_money(acct, usd)  # noqa: E731
 
-    # ---- refresh prices, auto-exit stops/targets
     last_prices, bars = {}, {}
-    for sym in {t["symbol"] for t in acct["open"]}:
+    for sym in {tr["symbol"] for tr in acct["open"]}:
         try:
             bars[sym] = _bars(sym)
             last_prices[sym] = float(bars[sym].close.iloc[-1])
         except prices.PriceDataError:
             pass
-    exits = demo_account.check_exits(acct, bars)
+    exits = da.check_exits(acct, bars)
     if exits:
-        demo_account.save(acct)
+        da.save(acct)
         for e in exits:
             st.toast(
-                f"{e['symbol']} {e['exit_reason']} hit at {e['exit_price']:.2f} "
-                f"({e['r_multiple']:+.2f}R)"
+                t(
+                    "demo.toast",
+                    sym=e["symbol"],
+                    reason=t(f"demo.reason.{e['exit_reason']}"),
+                    price=f"{e['exit_price']:.2f}",
+                    r=f"{e['r_multiple']:+.2f}",
+                )
             )
 
-    eq = demo_account.equity(acct, last_prices)
+    eq = da.equity(acct, last_prices)
     stats = training.trade_stats(acct["closed"])
-    m = st.columns(5)
+    has = stats["trades"] > 0
+    st.markdown(
+        t(
+            "demo.acct",
+            type=t(f"demo.type.{acct['account_type']}").split(":")[0],
+            start=money(acct["starting_balance"]),
+        )
+    )
     change = (eq / acct["starting_balance"] - 1) * 100
-    m[0].metric("Equity", _money(eq), f"{change:+.2f}%" if abs(change) >= 0.005 else None)
-    m[1].metric("Cash", f"${acct['cash']:,.2f}")
-    m[2].metric("Closed trades", stats["trades"])
-    m[3].metric("Win rate", f"{stats['win_rate']:.0%}" if stats["trades"] else "—")
-    m[4].metric("Expectancy", f"{stats['expectancy_r']:+.2f}R" if stats["trades"] else "—")
+    m = st.columns(5)
+    m[0].metric(t("demo.m_equity"), money(eq), f"{change:+.2f}%" if abs(change) >= 0.005 else None)
+    m[1].metric(t("demo.m_cash"), money(acct["cash"]))
+    m[2].metric(t("demo.m_closed"), stats["trades"])
+    m[3].metric(t("common.win_rate"), f"{stats['win_rate']:.0%}" if has else "—")
+    m[4].metric(t("common.expectancy"), f"{stats['expectancy_r']:+.2f}R" if has else "—")
 
     tab_new, tab_open, tab_journal = st.tabs(
-        ["New trade", f"Open ({len(acct['open'])})", f"Journal ({len(acct['closed'])})"]
+        [
+            t("demo.tab_new"),
+            t("demo.tab_open", n=len(acct["open"])),
+            t("demo.tab_journal", n=len(acct["closed"])),
+        ]
     )
     with tab_new:
-        _new_trade(acct, level, info, eq)
+        _new_trade(acct, level, info, eq, money)
     with tab_open:
-        _open_positions(acct, last_prices)
+        _open_positions(acct, last_prices, money)
     with tab_journal:
-        _journal(acct)
+        _journal(acct, money)
 
-    with st.expander("Reset account"):
-        st.warning("This deletes all demo trades and history.")
-        if st.button("Reset demo account"):
-            demo_account.ACCOUNT_FILE.unlink(missing_ok=True)
+    with st.expander(t("demo.reset_title")):
+        st.warning(t("demo.reset_warn"))
+        if st.button(t("demo.reset_btn")):
+            da.ACCOUNT_FILE.unlink(missing_ok=True)
             st.rerun()
 
 
-def _new_trade(acct, level, info, eq):
+def _new_trade(acct, level, info, eq, money):
     c1, c2 = st.columns([3, 1])
     sym_in = c1.text_input(
-        "Ticker", value=st.session_state.get("demo_symbol", ""), placeholder="e.g. AAPL"
+        t("common.ticker"),
+        value=st.session_state.get("demo_symbol", ""),
+        placeholder=t("demo.placeholder"),
     )
-    if c2.button("Get quote", use_container_width=True) and sym_in:
+    if c2.button(t("demo.quote"), use_container_width=True) and sym_in:
         st.session_state["demo_symbol"] = sym_in
     sym = st.session_state.get("demo_symbol")
     if not sym:
@@ -100,17 +124,27 @@ def _new_trade(acct, level, info, eq):
     try:
         sym = prices.clean_symbol(sym)
         df = _bars(sym)
-    except (ValueError, prices.PriceDataError) as exc:
+    except ValueError as exc:
         st.error(str(exc))
+        return
+    except prices.PriceDataError:
+        st.error(t("common.price_error"))
         return
 
     last = df.iloc[-1]
     entry = round(float(last.close), 2)
     atr = float(last.atr_14)
-    trend_ok = last.close > last.sma_50 > last.sma_200 if not math.isnan(last.sma_200) else False
+    trend_ok = (not math.isnan(last.sma_200)) and last.close > last.sma_50 > last.sma_200
     st.markdown(
-        f"**{sym}** last close **{entry}** ({df.index[-1].date()}) · ATR {atr:.2f} · "
-        f"RSI {last.rsi_14:.0f} · trend: {'🟢 up (above 50 & 200 SMA)' if trend_ok else '🟠 not a clean uptrend'}"
+        t(
+            "demo.quote_line",
+            sym=sym,
+            close=entry,
+            date=df.index[-1].date(),
+            atr=f"{atr:.2f}",
+            rsi=f"{last.rsi_14:.0f}",
+            trend=t("demo.trend_up") if trend_ok else t("demo.trend_no"),
+        )
     )
 
     view = df.tail(120)
@@ -131,35 +165,48 @@ def _new_trade(acct, level, info, eq):
     fig.update_xaxes(rangebreaks=[dict(bounds=["sat", "mon"])])
     st.plotly_chart(fig, use_container_width=True)
 
-    default_stop = round(entry - 2 * atr, 2)
-    with st.form("trade_form"):
-        c1, c2, c3 = st.columns(3)
-        stop = c1.number_input("Stop-loss", value=default_stop, step=0.01)
-        target = c2.number_input("Target", value=round(entry + 4 * atr, 2), step=0.01)
-        risk_cap = eq * info["max_risk_pct"] / 100
-        max_shares = int(risk_cap / (entry - stop)) if stop < entry else 0
-        max_shares = min(max_shares, int(acct["cash"] // entry))
-        shares = c3.number_input(
-            "Shares",
-            min_value=0,
-            value=max_shares,
-            step=1,
-            help=f"Default = most shares allowed by your {info['max_risk_pct']}% "
-            "risk limit and your cash.",
+    c1, c2, c3 = st.columns(3)
+    stop = c1.number_input(
+        t("common.stop"), value=round(entry - 2 * atr, 2), step=0.01, key=f"stop_{sym}"
+    )
+    target = c2.number_input(
+        t("common.target"), value=round(entry + 4 * atr, 2), step=0.01, key=f"target_{sym}"
+    )
+    default = da.max_shares(acct["cash"], eq, entry, stop, info["max_risk_pct"])
+    shares = c3.number_input(
+        t("demo.shares"),
+        min_value=0.0,
+        value=float(default),
+        step=0.01,
+        format="%.4f",
+        key=f"shares_{sym}_{stop}",
+        help=t("demo.shares_help", pct=info["max_risk_pct"]),
+    )
+    if stop < entry and shares > 0:
+        risk = (entry - stop) * shares
+        st.caption(
+            t(
+                "demo.risk_preview",
+                cost=money(entry * shares),
+                risk=money(risk),
+                pct=f"{risk / eq * 100:.2f}",
+            )
         )
-        reason = st.text_input("Why are you taking this trade? (required)")
-        st.markdown("**Pre-trade checklist**")
-        k1 = st.checkbox("I know where I'm wrong (stop) before entering")
-        k2 = st.checkbox("The reward is at least 2× the risk")
-        k3 = st.checkbox("I checked the overall market (Market Breadth)") if level >= 3 else True
-        if st.form_submit_button("Buy at last close", type="primary"):
+
+    with st.form("trade_form"):
+        reason = st.text_input(t("demo.reason"))
+        st.markdown(t("demo.checklist"))
+        k1 = st.checkbox(t("demo.chk1"))
+        k2 = st.checkbox(t("demo.chk2"))
+        k3 = st.checkbox(t("demo.chk3")) if level >= 3 else True
+        if st.form_submit_button(t("demo.buy"), type="primary"):
             if not reason.strip():
-                st.error("Write a reason first — it goes into your journal.")
+                st.error(t("demo.err_reason"))
             elif not (k1 and k2 and k3):
-                st.error("Tick every checklist item first.")
+                st.error(t("demo.err_check"))
             else:
                 try:
-                    t = demo_account.open_trade(
+                    tr = da.open_trade(
                         acct,
                         sym,
                         entry,
@@ -170,56 +217,74 @@ def _new_trade(acct, level, info, eq):
                         info["max_risk_pct"],
                         note=reason.strip(),
                     )
-                except demo_account.RuleViolation as exc:
-                    st.error(str(exc))
+                except da.RuleViolation as exc:
+                    params = dict(exc.params)
+                    for k in ("need", "have"):
+                        if k in params:
+                            params[k] = money(params[k])
+                    st.error(t(f"demo.err.{exc.code}", **params))
                 else:
-                    demo_account.save(acct)
+                    da.save(acct)
                     st.success(
-                        f"Bought {shares} {sym} at {entry}. Risk ${t['risk_dollars']:,.2f} "
-                        f"({t['risk_pct']}%)."
+                        t(
+                            "demo.bought",
+                            shares=da.fmt_shares(tr["shares"]),
+                            sym=sym,
+                            price=entry,
+                            risk=money(tr["risk_dollars"]),
+                            pct=tr["risk_pct"],
+                        )
                     )
                     st.rerun()
 
 
-def _open_positions(acct, last_prices):
+def _open_positions(acct, last_prices, money):
     if not acct["open"]:
-        st.caption("No open positions.")
+        st.caption(t("demo.no_open"))
         return
-    st.caption("Stops and targets are checked against each new daily bar when this page loads.")
-    for t in list(acct["open"]):
-        px = last_prices.get(t["symbol"], t["entry"])
-        r = (px - t["entry"]) / (t["entry"] - t["stop"])
+    st.caption(t("demo.open_caption"))
+    for tr in list(acct["open"]):
+        px = last_prices.get(tr["symbol"], tr["entry"])
+        r = (px - tr["entry"]) / (tr["entry"] - tr["stop"]) + 0
         with st.container(border=True):
             c = st.columns([2, 2, 2, 2, 1])
-            c[0].markdown(f"**{t['symbol']}** × {t['shares']}  \n{t['entry_date']}")
-            c[1].markdown(f"Entry {t['entry']}  \nNow **{px:.2f}**")
-            c[2].markdown(f"Stop {t['stop']}  \nTarget {t['target']}")
-            c[3].markdown(f"P&L **{_money((px - t['entry']) * t['shares'])}**  \n{r + 0:+.2f}R")
-            if c[4].button("Close", key=f"close_{t['id']}"):
-                demo_account.close_trade(acct, t["id"], px, date.today().isoformat(), "manual")
-                demo_account.save(acct)
+            c[0].markdown(
+                f"**{tr['symbol']}** × {da.fmt_shares(tr['shares'])}  \n{tr['entry_date']}"
+            )
+            c[1].markdown(t("demo.pos_entry", entry=tr["entry"], now=f"{px:.2f}"))
+            c[2].markdown(t("demo.pos_levels", stop=tr["stop"], target=tr["target"]))
+            c[3].markdown(
+                t("demo.pos_pnl", pnl=money((px - tr["entry"]) * tr["shares"]), r=f"{r:+.2f}")
+            )
+            if c[4].button(t("demo.close"), key=f"close_{tr['id']}"):
+                da.close_trade(acct, tr["id"], px, date.today().isoformat(), "manual")
+                da.save(acct)
                 st.rerun()
-            if t.get("note"):
-                st.caption(f"Reason: {t['note']}")
+            if tr.get("note"):
+                st.caption(t("demo.note", note=tr["note"]))
 
 
-def _journal(acct):
+def _journal(acct, money):
     if not acct["closed"]:
-        st.caption("Closed trades appear here.")
+        st.caption(t("demo.no_closed"))
         return
     df = pd.DataFrame(acct["closed"])
-    df["cum_pnl"] = df["pnl"].cumsum()
-    fig = go.Figure(
-        go.Scatter(
-            x=list(range(1, len(df) + 1)),
-            y=acct["starting_balance"] + df["cum_pnl"],
-            mode="lines+markers",
-        )
-    )
+    per_usd = da.ACCOUNT_TYPES[acct["account_type"]][2]
+    curve = (acct["starting_balance"] + df["pnl"].cumsum()) * per_usd
+    fig = go.Figure(go.Scatter(x=list(range(1, len(df) + 1)), y=curve, mode="lines+markers"))
+    unit = "USC" if per_usd != 1 else "$"
     fig.update_layout(
-        height=260, margin=dict(t=10, b=10), xaxis_title="trade #", yaxis_title="account ($)"
+        height=260,
+        margin=dict(t=10, b=10),
+        xaxis_title=t("demo.axis_trade"),
+        yaxis_title=f"{t('demo.axis_account')} ({unit})",
     )
     st.plotly_chart(fig, use_container_width=True)
+
+    view = df.copy()
+    view["pnl"] = view["pnl"].map(money)
+    view["shares"] = view["shares"].map(da.fmt_shares)
+    view["exit_reason"] = view["exit_reason"].map(lambda k: t(f"demo.reason.{k}"))
     cols = [
         "symbol",
         "entry_date",
@@ -233,10 +298,8 @@ def _journal(acct):
         "r_multiple",
         "note",
     ]
-    st.dataframe(df[cols].iloc[::-1], hide_index=True, use_container_width=True)
+    view = view[cols].iloc[::-1].rename(columns={c: t(f"col.{c}") for c in cols})
+    st.dataframe(view, hide_index=True, use_container_width=True)
     worst = df.nsmallest(1, "r_multiple").iloc[0]
     if worst["r_multiple"] < -1.05:
-        st.warning(
-            f"Your worst trade ({worst['symbol']}) lost {worst['r_multiple']:.2f}R — more "
-            "than your planned risk. That usually means a gap or a moved stop."
-        )
+        st.warning(t("demo.worst", sym=worst["symbol"], r=f"{worst['r_multiple']:.2f}"))

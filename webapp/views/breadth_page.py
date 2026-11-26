@@ -6,6 +6,8 @@ import streamlit as st
 from core import breadth
 from core.paths import REPORTS_DIR
 
+from views.lang import t
+
 OUT_DIR = REPORTS_DIR / "webapp" / "market_breadth"
 
 
@@ -43,28 +45,25 @@ def _gauge(score: float, zone: str):
 
 
 def render():
-    st.title("🌡️ Market Breadth")
-    st.caption("Runs skills/market-breadth-analyzer on TraderMonty's public CSV — no API key.")
-
+    st.title("🌡️ " + t("nav.breadth"))
+    st.caption(t("breadth.caption"))
     col1, col2 = st.columns([1, 3])
-    run = col1.button("Run analysis", type="primary")
     analysis = None
-    if run:
-        with st.spinner("Fetching breadth data and scoring…"):
+    if col1.button(t("breadth.run"), type="primary"):
+        with st.spinner(t("breadth.spinner")):
             try:
                 analysis = breadth.run_analyzer(OUT_DIR, _source_args())
             except (breadth.BreadthError, OSError) as exc:
-                st.error(f"Analyzer failed: {exc}")
+                st.error(t("breadth.failed", err=exc))
                 return
     elif OUT_DIR.exists():
         try:
             analysis = breadth.load_latest_report(OUT_DIR)
-            col2.caption("Showing the latest saved report. Click **Run analysis** to refresh.")
+            col2.caption(t("breadth.saved"))
         except breadth.BreadthError:
             pass
-
     if not analysis:
-        st.info("No report yet — click **Run analysis**.")
+        st.info(t("breadth.none"))
         return
 
     comp = analysis.get("composite", {})
@@ -72,24 +71,26 @@ def render():
     fresh = meta.get("data_freshness", {})
     if fresh.get("warning"):
         st.warning(fresh["warning"])
-
-    left, right = st.columns([1, 1])
+    left, right = st.columns(2)
     left.plotly_chart(
         _gauge(comp.get("composite_score", 0), comp.get("zone", "")), use_container_width=True
     )
     with right:
-        st.metric("Equity exposure guidance", comp.get("exposure_guidance", "—"))
+        st.metric(t("breadth.exposure"), comp.get("exposure_guidance", "—"))
         sh, wk = comp.get("strongest_health", {}), comp.get("weakest_health", {})
-        st.write(f"**Strongest:** {sh.get('label', '—')} ({sh.get('score', '—')})")
-        st.write(f"**Weakest:** {wk.get('label', '—')} ({wk.get('score', '—')})")
+        st.write(f"**{t('breadth.strongest')}:** {sh.get('label', '—')} ({sh.get('score', '—')})")
+        st.write(f"**{t('breadth.weakest')}:** {wk.get('label', '—')} ({wk.get('score', '—')})")
         st.caption(
-            f"Latest data: {fresh.get('latest_date', '—')} · generated "
-            f"{meta.get('generated_at', '—')}"
+            t(
+                "breadth.latest",
+                date=fresh.get("latest_date", "—"),
+                gen=meta.get("generated_at", "—"),
+            )
         )
 
     rows = breadth.component_rows(analysis)
     if rows:
-        st.subheader("Components")
+        st.subheader(t("breadth.components"))
         st.dataframe(
             pd.DataFrame(rows),
             hide_index=True,
@@ -100,13 +101,12 @@ def render():
                 )
             },
         )
-
     levels = analysis.get("key_levels") or {}
     if levels:
-        st.subheader("Key levels to watch")
+        st.subheader(t("breadth.levels"))
         st.dataframe(
             pd.DataFrame([{"level": k, **v} for k, v in levels.items()]),
             hide_index=True,
             use_container_width=True,
         )
-    st.caption(f"Reports saved to {os.path.relpath(OUT_DIR)}")
+    st.caption(t("breadth.saved_to", path=os.path.relpath(OUT_DIR)))
