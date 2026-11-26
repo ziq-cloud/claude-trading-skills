@@ -1,5 +1,5 @@
 import streamlit as st
-from core import catalog
+from core import demo_account, instruments
 
 from views import nav
 from views.lang import t
@@ -15,24 +15,17 @@ def render():
         st.caption(t("home.next", unlock=info["unlock"]))
         st.page_link(nav.PAGES["learn"], label=t("home.continue"), icon="🎓")
 
-    skills = catalog.load_skills()
-    free = sum(1 for s in skills if s.api_level == "none")
     c1, c2, c3 = st.columns(3)
-    c1.metric(t("home.m_skills"), len(skills))
-    c2.metric(t("home.m_free"), free)
-    c3.metric(t("home.m_paid"), len(skills) - free)
+    c1.metric(t("home.m_instruments"), len(instruments.INSTRUMENTS))
+    c2.metric(t("home.m_lots"), f"{instruments.LOT_SIZES[0]:.2f} – {instruments.LOT_SIZES[-1]:.2f}")
+    c3.metric(t("home.m_leverage"), f"1:{demo_account.DEFAULT_LEVERAGE}")
+    st.caption(" · ".join(i.name for i in instruments.INSTRUMENTS.values()))
 
     st.subheader(t("home.tools"))
     cols = st.columns(2)
-    tools = [
-        ("replay", "⏪"),
-        ("demo", "💼"),
-        ("chart", "📊"),
-        ("sizer", "🧮"),
-        ("breadth", "🌡️"),
-        ("catalog", "📚"),
-    ]
-    for i, (key, icon) in enumerate(tools):
+    for i, (key, icon) in enumerate(
+        [("replay", "⏪"), ("demo", "💼"), ("chart", "📊"), ("calc", "🧮")]
+    ):
         with cols[i % 2].container(border=True):
             st.page_link(nav.PAGES[key], label=f"**{t('nav.' + key)}**", icon=icon)
             st.caption(t(f"home.desc.{key}"))

@@ -5,16 +5,12 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 from core import demo_account as da
-from core import indicators, prices, training
+from core import instruments as ins
+from core import prices, training
 
+from views.common import bars, instrument_picker, price_input
 from views.lang import t
 from views.state import level_info
-
-
-@st.cache_data(ttl=600, show_spinner=False)
-def _bars(symbol):
-    df, _ = prices.fetch_daily(symbol)
-    return indicators.add_indicators(df)
 
 
 def _setup():
@@ -28,12 +24,12 @@ def _setup():
     if acct_type == "cent":
         st.caption(t("demo.cent_help"))
     choices = da.ACCOUNT_TYPES[acct_type][3]
-    unit = "USC" if acct_type == "cent" else "USD"
+    cent = acct_type == "cent"
     bal = st.select_slider(
         t("demo.balance"),
         choices,
         value=choices[len(choices) // 2],
-        format_func=lambda v: f"{v:,} {unit}" if unit == "USC" else f"${v:,}",
+        format_func=lambda v: f"{v:,} USC" if cent else f"${v:,}",
     )
     if st.button(t("demo.create"), type="primary"):
         da.save(da.new_account(bal, acct_type))
@@ -43,34 +39,45 @@ def _setup():
 def render():
     level, info, _, acct = level_info()
     st.title("💼 " + t("nav.demo"))
-    st.caption(t("demo.caption", n=level, name=info["name"], pct=info["max_risk_pct"]))
+    st.caption(
+        t(
+            "demo.caption",
+            n=level,
+            name=info["name"],
+            pct=info["max_risk_pct"],
+            lev=da.DEFAULT_LEVERAGE,
+        )
+    )
     if acct is None:
         _setup()
         return
     money = lambda usd: da.fmt_money(acct, usd)  # noqa: E731
 
-    last_prices, bars = {}, {}
-    for sym in {tr["symbol"] for tr in acct["open"]}:
+    # ---- latest closes, auto stop/target exits, stop-out
+    last_prices, all_bars = {}, {}
+    for code in {tr["code"] for tr in acct["open"]}:
         try:
-            bars[sym] = _bars(sym)
-            last_prices[sym] = float(bars[sym].close.iloc[-1])
+            all_bars[code], _ = bars(code)
+            last_prices[code] = float(all_bars[code].close.iloc[-1])
         except prices.PriceDataError:
             pass
-    exits = da.check_exits(acct, bars)
-    if exits:
+    events = da.check_exits(acct, all_bars)
+    events += da.stop_out(acct, last_prices, date.today().isoformat())
+    if events:
         da.save(acct)
-        for e in exits:
+        for e in events:
             st.toast(
                 t(
                     "demo.toast",
-                    sym=e["symbol"],
+                    sym=ins.get(e["code"]).name,
                     reason=t(f"demo.reason.{e['exit_reason']}"),
-                    price=f"{e['exit_price']:.2f}",
+                    price=ins.fmt_price(ins.get(e["code"]), e["exit_price"]),
                     r=f"{e['r_multiple']:+.2f}",
                 )
             )
 
     eq = da.equity(acct, last_prices)
+    level_pct = da.margin_level(acct, last_prices)
     stats = training.trade_stats(acct["closed"])
     has = stats["trades"] > 0
     st.markdown(
@@ -82,8 +89,12 @@ def render():
     )
     change = (eq / acct["starting_balance"] - 1) * 100
     m = st.columns(2)
-    m[0].metric(t("demo.m_equity"), money(eq), f"{change:+.2f}%" if abs(change) >= 0.005 else None)
-    m[1].metric(t("demo.m_cash"), money(acct["cash"]))
+    m[0].metric(t("demo.m_balance"), money(acct["balance"]))
+    m[1].metric(t("demo.m_equity"), money(eq), f"{change:+.2f}%" if abs(change) >= 0.005 else None)
+    m = st.columns(3)
+    m[0].metric(t("demo.m_margin"), money(da.used_margin(acct)))
+    m[1].metric(t("demo.m_free"), money(da.free_margin(acct, last_prices)))
+    m[2].metric(t("demo.m_level"), "—" if level_pct is None else f"{level_pct:,.0f}%")
     m = st.columns(3)
     m[0].metric(t("demo.m_closed"), stats["trades"])
     m[1].metric(t("common.win_rate"), f"{stats['win_rate']:.0%}" if has else "—")
@@ -97,7 +108,7 @@ def render():
         ]
     )
     with tab_new:
-        _new_trade(acct, level, info, eq, money)
+        _new_trade(acct, level, info, last_prices, money)
     with tab_open:
         _open_positions(acct, last_prices, money)
     with tab_journal:
@@ -110,48 +121,47 @@ def render():
             st.rerun()
 
 
-def _new_trade(acct, level, info, eq, money):
-    c1, c2 = st.columns([3, 1])
-    sym_in = c1.text_input(
-        t("common.ticker"),
-        value=st.session_state.get("demo_symbol", ""),
-        placeholder=t("demo.placeholder"),
-    )
-    if c2.button(t("demo.quote"), use_container_width=True) and sym_in:
-        st.session_state["demo_symbol"] = sym_in
-    sym = st.session_state.get("demo_symbol")
-    if not sym:
-        return
+def _new_trade(acct, level, info, last_prices, money):
+    code = instrument_picker("demo_code")
+    inst = ins.get(code)
     try:
-        sym = prices.clean_symbol(sym)
-        df = _bars(sym)
-    except ValueError as exc:
-        st.error(str(exc))
-        return
+        df, _ = bars(code)
     except prices.PriceDataError:
         st.error(t("common.price_error"))
         return
 
     last = df.iloc[-1]
-    entry = round(float(last.close), 2)
+    entry = round(float(last.close), inst.digits)
     atr = float(last.atr_14)
-    trend_ok = (not math.isnan(last.sma_200)) and last.close > last.sma_50 > last.sma_200
+    if math.isnan(last.sma_200):
+        trend = t("demo.trend_no")
+    elif last.close > last.sma_50 > last.sma_200:
+        trend = t("demo.trend_up")
+    elif last.close < last.sma_50 < last.sma_200:
+        trend = t("demo.trend_down")
+    else:
+        trend = t("demo.trend_no")
     st.markdown(
         t(
             "demo.quote_line",
-            sym=sym,
-            close=entry,
+            sym=inst.name,
+            close=ins.fmt_price(inst, entry),
             date=df.index[-1].date(),
-            atr=f"{atr:.2f}",
+            atr=f"{ins.pips(inst, atr, 0):,.0f} pips",
             rsi=f"{last.rsi_14:.0f}",
-            trend=t("demo.trend_up") if trend_ok else t("demo.trend_no"),
+            trend=trend,
         )
     )
 
     view = df.tail(120)
     fig = go.Figure(
         go.Candlestick(
-            x=view.index, open=view.open, high=view.high, low=view.low, close=view.close, name=sym
+            x=view.index,
+            open=view.open,
+            high=view.high,
+            low=view.low,
+            close=view.close,
+            name=inst.name,
         )
     )
     for w, c in ((50, "#2f7ed8"), (200, "#c0392b")):
@@ -163,44 +173,69 @@ def _new_trade(acct, level, info, eq, money):
     fig.update_layout(
         height=320, xaxis_rangeslider_visible=False, margin=dict(t=10, b=10), showlegend=False
     )
-    fig.update_xaxes(rangebreaks=[dict(bounds=["sat", "mon"])])
+    if inst.kind != "crypto":
+        fig.update_xaxes(rangebreaks=[dict(bounds=["sat", "mon"])])
     st.plotly_chart(fig, use_container_width=True)
 
+    side = st.radio(
+        t("replay.side"),
+        ["buy", "sell"],
+        horizontal=True,
+        format_func=lambda s: t(f"common.{s}"),
+        key="demo_side",
+    )
+    d = 1 if side == "buy" else -1
+    prices_now = {**last_prices, code: entry}
+    eq = da.equity(acct, prices_now)
+    sc = da.scale(acct)
+
     c1, c2, c3 = st.columns(3)
-    stop = c1.number_input(
-        t("common.stop"), value=round(entry - 2 * atr, 2), step=0.01, key=f"stop_{sym}"
+    stop = price_input(c1, t("common.stop"), inst, entry - d * atr, f"ds_{code}_{side}")
+    target = price_input(c2, t("common.target"), inst, entry + d * 2 * atr, f"dt_{code}_{side}")
+    suggested = (
+        ins.suggest_lot(
+            inst, eq, da.free_margin(acct, prices_now), entry, stop, info["max_risk_pct"], sc
+        )
+        if (entry - stop) * d > 0
+        else None
     )
-    target = c2.number_input(
-        t("common.target"), value=round(entry + 4 * atr, 2), step=0.01, key=f"target_{sym}"
+    lots = c3.selectbox(
+        t("common.lots"),
+        ins.LOT_SIZES,
+        index=ins.LOT_SIZES.index(suggested or ins.LOT_SIZES[0]),
+        format_func=da.fmt_lots,
+        key=f"dl_{code}_{side}_{stop}",
+        help=t("demo.lots_help", pct=info["max_risk_pct"]),
     )
-    default = da.max_shares(acct["cash"], eq, entry, stop, info["max_risk_pct"])
-    shares = c3.number_input(
-        t("demo.shares"),
-        min_value=0.0,
-        value=float(default),
-        step=0.01,
-        format="%.4f",
-        key=f"shares_{sym}_{stop}",
-        help=t("demo.shares_help", pct=info["max_risk_pct"]),
-    )
-    if stop < entry and shares > 0:
-        risk = (entry - stop) * shares
+    if (entry - stop) * d > 0:
+        risk = ins.risk_usd(inst, lots, entry, stop, sc)
         st.caption(
             t(
-                "demo.risk_preview",
-                cost=money(entry * shares),
+                "demo.preview",
+                pips=f"{ins.pips(inst, entry, stop):,.0f}",
                 risk=money(risk),
                 pct=f"{risk / eq * 100:.2f}",
+                margin=money(ins.margin_usd(inst, lots, entry, sc)),
             )
         )
+        if suggested is None:
+            st.warning(t("demo.no_lot", pct=info["max_risk_pct"]))
 
+    side_label = t(f"common.{side}")
     with st.form("trade_form"):
         reason = st.text_input(t("demo.reason"))
         st.markdown(t("demo.checklist"))
         k1 = st.checkbox(t("demo.chk1"))
         k2 = st.checkbox(t("demo.chk2"))
         k3 = st.checkbox(t("demo.chk3")) if level >= 3 else True
-        if st.form_submit_button(t("demo.buy"), type="primary"):
+        label = t(
+            "demo.place",
+            side=side_label,
+            lots=da.fmt_lots(lots),
+            sym=inst.name,
+            price=ins.fmt_price(inst, entry),
+        )
+        if st.form_submit_button(label, type="primary"):
             if not reason.strip():
                 st.error(t("demo.err_reason"))
             elif not (k1 and k2 and k3):
@@ -209,14 +244,16 @@ def _new_trade(acct, level, info, eq, money):
                 try:
                     tr = da.open_trade(
                         acct,
-                        sym,
+                        code,
+                        side,
+                        lots,
                         entry,
                         stop,
                         target,
-                        shares,
                         str(df.index[-1].date()),
                         info["max_risk_pct"],
                         note=reason.strip(),
+                        last_prices=prices_now,
                     )
                 except da.RuleViolation as exc:
                     params = dict(exc.params)
@@ -228,11 +265,12 @@ def _new_trade(acct, level, info, eq, money):
                     da.save(acct)
                     st.success(
                         t(
-                            "demo.bought",
-                            shares=da.fmt_shares(tr["shares"]),
-                            sym=sym,
-                            price=entry,
-                            risk=money(tr["risk_dollars"]),
+                            "demo.opened",
+                            side=side_label,
+                            lots=da.fmt_lots(lots),
+                            sym=inst.name,
+                            price=ins.fmt_price(inst, entry),
+                            risk=money(tr["risk_usd"]),
                             pct=tr["risk_pct"],
                         )
                     )
@@ -245,18 +283,21 @@ def _open_positions(acct, last_prices, money):
         return
     st.caption(t("demo.open_caption"))
     for tr in list(acct["open"]):
-        px = last_prices.get(tr["symbol"], tr["entry"])
-        r = (px - tr["entry"]) / (tr["entry"] - tr["stop"]) + 0
+        inst = ins.get(tr["code"])
+        px = last_prices.get(tr["code"], tr["entry"])
+        d = 1 if tr["side"] == "buy" else -1
+        r = (px - tr["entry"]) * d / abs(tr["entry"] - tr["stop"]) + 0.0
+        f = lambda v, i=inst: "—" if v is None else ins.fmt_price(i, v)  # noqa: E731
         with st.container(border=True):
             c = st.columns([2, 2, 2, 2, 1])
+            arrow = "🟢" if d == 1 else "🔴"
             c[0].markdown(
-                f"**{tr['symbol']}** × {da.fmt_shares(tr['shares'])}  \n{tr['entry_date']}"
+                f"{arrow} **{inst.name}**  \n{t('common.' + tr['side'])} "
+                f"{da.fmt_lots(tr['lots'])} · {tr['entry_date']}"
             )
-            c[1].markdown(t("demo.pos_entry", entry=tr["entry"], now=f"{px:.2f}"))
-            c[2].markdown(t("demo.pos_levels", stop=tr["stop"], target=tr["target"]))
-            c[3].markdown(
-                t("demo.pos_pnl", pnl=money((px - tr["entry"]) * tr["shares"]), r=f"{r:+.2f}")
-            )
+            c[1].markdown(t("demo.pos_entry", entry=f(tr["entry"]), now=f(px)))
+            c[2].markdown(t("demo.pos_levels", stop=f(tr["stop"]), target=f(tr["target"])))
+            c[3].markdown(t("demo.pos_pnl", pnl=money(da.trade_pnl(acct, tr, px)), r=f"{r:+.2f}"))
             if c[4].button(t("demo.close"), key=f"close_{tr['id']}"):
                 da.close_trade(acct, tr["id"], px, date.today().isoformat(), "manual")
                 da.save(acct)
@@ -280,20 +321,27 @@ def _journal(acct, money):
         xaxis_title=t("demo.axis_trade"),
         yaxis_title=f"{t('demo.axis_account')} ({unit})",
     )
+    fig.update_xaxes(dtick=1)
     st.plotly_chart(fig, use_container_width=True)
 
     view = df.copy()
+    fmt = lambda row, col: ins.fmt_price(ins.get(row["code"]), row[col])  # noqa: E731
+    for col in ("entry", "exit_price", "stop"):
+        view[col] = view.apply(lambda row, c=col: fmt(row, c), axis=1)
+    view["instrument"] = view["code"].map(lambda c: ins.get(c).name)
+    view["side"] = view["side"].map(lambda s: t(f"common.{s}"))
+    view["lots"] = view["lots"].map(da.fmt_lots)
     view["pnl"] = view["pnl"].map(money)
-    view["shares"] = view["shares"].map(da.fmt_shares)
     view["exit_reason"] = view["exit_reason"].map(lambda k: t(f"demo.reason.{k}"))
     cols = [
-        "symbol",
+        "instrument",
+        "side",
+        "lots",
         "entry_date",
         "exit_date",
         "entry",
         "exit_price",
         "stop",
-        "shares",
         "exit_reason",
         "pnl",
         "r_multiple",
@@ -303,4 +351,4 @@ def _journal(acct, money):
     st.dataframe(view, hide_index=True, use_container_width=True)
     worst = df.nsmallest(1, "r_multiple").iloc[0]
     if worst["r_multiple"] < -1.05:
-        st.warning(t("demo.worst", sym=worst["symbol"], r=f"{worst['r_multiple']:.2f}"))
+        st.warning(t("demo.worst", sym=ins.get(worst["code"]).name, r=f"{worst['r_multiple']:.2f}"))

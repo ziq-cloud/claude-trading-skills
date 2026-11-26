@@ -2,53 +2,28 @@ import random
 
 import plotly.graph_objects as go
 import streamlit as st
-from core import indicators, prices, training
+from core import instruments as ins
+from core import prices, training
 
+from views.common import bars, price_input
 from views.lang import t
 from views.state import level_info
 
-POOL = [
-    "AAPL",
-    "MSFT",
-    "NVDA",
-    "AMZN",
-    "META",
-    "GOOGL",
-    "TSLA",
-    "AMD",
-    "NFLX",
-    "JPM",
-    "XOM",
-    "COST",
-    "AVGO",
-    "LLY",
-    "CRM",
-    "SPY",
-    "QQQ",
-    "IWM",
-    "KO",
-    "DIS",
-]
+POOL = list(ins.INSTRUMENTS)
 VISIBLE = 120
 HORIZON = 20
 
 
-@st.cache_data(ttl=3600, show_spinner=False)
-def _history(symbol):
-    df, _ = prices.fetch_daily(symbol)
-    return indicators.add_indicators(df)
-
-
 def _new_round():
-    for _ in range(5):
-        sym = random.choice(POOL)
+    for _ in range(6):
+        code = random.choice(POOL)
         try:
-            df = _history(sym)
+            df, _ = bars(code)
         except prices.PriceDataError:
             continue
         if len(df) >= 220 + HORIZON:
             cut = random.randint(220, len(df) - HORIZON)
-            st.session_state.replay_round = {"symbol": sym, "cut": cut, "result": None}
+            st.session_state.replay_round = {"code": code, "cut": cut, "result": None}
             return
     st.session_state.replay_round = None
 
@@ -105,10 +80,11 @@ def render():
     if rp is None:
         st.error(t("common.price_error"))
         return
-    df = _history(rp["symbol"])
+    inst = ins.get(rp["code"])
+    df, _ = bars(rp["code"])
     cut = rp["cut"]
     last = df.iloc[cut - 1]
-    entry = round(float(last.close), 2)
+    entry = round(float(last.close), inst.digits)
     atr = float(last.atr_14)
 
     stats = training.trade_stats(progress.replays)
@@ -121,36 +97,55 @@ def render():
 
     if rp["result"] is None:
         st.plotly_chart(_chart(df, cut, False), use_container_width=True)
-        st.caption(t("replay.caption", close=entry, atr=f"{atr:.2f}", rsi=f"{last.rsi_14:.0f}"))
-        with st.form("replay_form"):
-            c1, c2, c3 = st.columns(3)
-            stop = c1.number_input(t("common.stop"), value=round(entry - 2 * atr, 2), step=0.01)
-            target = c2.number_input(t("common.target"), value=round(entry + 4 * atr, 2), step=0.01)
-            reason = c3.text_input(t("replay.reason"))
-            if stop < entry:
-                st.caption(
-                    t(
-                        "replay.rr",
-                        risk=f"{entry - stop:.2f}",
-                        reward=f"{target - entry:.2f}",
-                        rr=f"{(target - entry) / (entry - stop):.1f}",
-                    )
+        st.caption(
+            t(
+                "replay.caption",
+                close=ins.fmt_price(inst, entry),
+                atr=f"{ins.pips(inst, atr, 0):,.0f} pips",
+                rsi=f"{last.rsi_14:.0f}",
+            )
+        )
+        side = st.radio(
+            t("replay.side"),
+            ["buy", "sell"],
+            horizontal=True,
+            format_func=lambda s: t(f"replay.{s}"),
+            key=f"side_{rp['cut']}",
+        )
+        d = 1 if side == "buy" else -1
+        c1, c2, c3 = st.columns(3)
+        key = f"{rp['code']}_{cut}_{side}"
+        stop = price_input(c1, t("common.stop"), inst, entry - d * atr, f"rs_{key}")
+        target = price_input(c2, t("common.target"), inst, entry + d * 2 * atr, f"rt_{key}")
+        reason = c3.text_input(t("replay.reason"), key=f"rr_{cut}")
+        if (entry - stop) * d > 0:
+            st.caption(
+                t(
+                    "replay.rr",
+                    risk=f"{ins.pips(inst, entry, stop):,.0f} pips",
+                    reward=f"{ins.pips(inst, entry, target):,.0f} pips",
+                    rr=f"{abs(target - entry) / abs(entry - stop):.1f}",
                 )
-            b1, b2 = st.columns(2)
-            buy = b1.form_submit_button(t("replay.buy"), type="primary", use_container_width=True)
-            skip = b2.form_submit_button(t("replay.skip"), use_container_width=True)
-        if buy:
+            )
+        b1, b2 = st.columns(2)
+        place = b1.button(t("replay.place"), type="primary", use_container_width=True)
+        skip = b2.button(t("replay.skip"), use_container_width=True)
+        if place:
             try:
-                res = training.evaluate_trade(entry, stop, target, df.iloc[cut : cut + HORIZON])
+                res = training.evaluate_trade(
+                    entry, stop, target, df.iloc[cut : cut + HORIZON], side=side
+                )
             except ValueError:
-                st.error(t("demo.err.stop") if stop >= entry else t("demo.err.target"))
+                bad_stop = (entry - stop) * d <= 0
+                st.error(t("demo.err.stop") if bad_stop else t("demo.err.target"))
                 return
             res.update(
                 {
                     "entry": entry,
                     "stop": stop,
                     "target": target,
-                    "symbol": rp["symbol"],
+                    "code": rp["code"],
+                    "side": side,
                     "reason": reason,
                     "date": str(df.index[cut - 1].date()),
                 }
@@ -167,9 +162,9 @@ def render():
         res = rp["result"]
         trade = None if res.get("skipped") else res
         st.plotly_chart(_chart(df, cut, True, trade), use_container_width=True)
-        reveal = f"**{rp['symbol']}**, {df.index[cut - 1].date()}"
+        reveal = f"**{inst.name}**, {df.index[cut - 1].date()}"
         if res.get("skipped"):
-            st.info(t("replay.skipped", h=HORIZON, move=f"{res['move_pct']:+.1f}%", reveal=reveal))
+            st.info(t("replay.skipped", h=HORIZON, move=f"{res['move_pct']:+.2f}%", reveal=reveal))
         else:
             msg = {
                 "target": t("replay.target_hit"),
@@ -180,7 +175,7 @@ def render():
                 "replay.result",
                 msg=msg,
                 bars=res["bars_held"],
-                price=f"{res['exit_price']:.2f}",
+                price=ins.fmt_price(inst, res["exit_price"]),
                 r=f"{res['r_multiple']:+.2f}",
                 reveal=reveal,
             )

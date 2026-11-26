@@ -1,56 +1,71 @@
-# Trading Skills Web App
+# Forex Trading Trainer (web app)
 
-A Streamlit app that takes a trader from zero to an advanced, rule-based process,
-with virtual money first. The tool pages call the same Python code the Claude skills
-use, so the numbers match the CLI output.
+A Streamlit app that takes a trader from zero to an advanced, rule-based process with
+virtual money first. It covers **major forex pairs, gold, bitcoin and WTI crude oil only**,
+with **fixed lot sizes**, buy and sell, leverage and margin.
+
+> For education only. This is not financial advice, and it is not a broker.
+
+## Instruments
+
+| Instrument | Contract per 1.00 lot | Pip | Leverage | Price data |
+|------------|-----------------------|-----|----------|------------|
+| EUR/USD, GBP/USD, AUD/USD, NZD/USD, USD/CHF, USD/CAD | 100,000 units | 0.0001 | 1:100 | Twelve Data → Yahoo |
+| USD/JPY | 100,000 units | 0.01 | 1:100 | Twelve Data → Yahoo |
+| XAU/USD (gold) | 100 oz | 0.1 | 1:100 | Twelve Data → Yahoo `GC=F` |
+| BTC/USD | 1 BTC | 1 | 1:20 | Twelve Data → Yahoo `BTC-USD` |
+| WTI crude oil | 1,000 barrels | 0.01 | 1:100 | Yahoo `CL=F` (Twelve Data's WTI needs a paid plan) |
+
+Contract sizes follow common retail-broker specs; real brokers differ. Prices are **daily**
+closes, so this is a swing-trading trainer, not an intraday one. Spreads, swaps and
+commissions are not modelled.
+
+**Fixed volume:** trades use one of `0.01, 0.02, 0.05, 0.10, 0.20, 0.50, 1.00` lots. The app
+suggests the largest size whose stop-loss risk fits your level's limit and your free margin.
+
+## Demo account
+
+| Type | Balance options | Contract | Display |
+|------|-----------------|----------|---------|
+| Standard | $100 – $1,000 | 1 lot = full contract | `$1,000.00` |
+| Cent | 10,000 – 1,000,000 USC ($100 – $10,000) | 1 lot = 1/100 contract | `100,000 USC` |
+
+* Buy or sell; a stop-loss and a written reason are required; a pre-trade checklist.
+* Leverage 1:100 (BTC 1:20). Opening a trade reserves margin; the balance changes when it closes.
+* Balance, equity, used and free margin, margin level. **Stop-out at 50%** closes the worst
+  losing trade.
+* Stops and targets are checked against each new daily bar (gaps fill at the open; a bar
+  touching both counts as the stop).
+* Journal with equity curve, win rate and expectancy in R.
+
+On a small standard account, even 0.01 lot can exceed a 0.5–1% risk limit, and the app
+blocks the trade and says why. That is deliberate: it is the reason cent accounts exist.
+
+## Training (zero → advanced)
+
+| Level | Lessons | Unlocks when | Max risk / demo trade |
+|-------|---------|--------------|-----------------------|
+| 1 Beginner | Candles, trend, support/resistance, stop-loss, 1% rule | Basics quiz ≥ 80% | 0.5% |
+| 2 Risk Control | R-multiples, reward:risk, lots and pips, leverage and margin | 10 Chart Replay trades | 1% |
+| 3 Trend & Context | News and sessions, RSI/ATR, expectancy | 10 closed demo trades with positive expectancy | 1% |
+| 4 Advanced | Setups, process over outcome | (top level) | 2% |
+
+| Page | What it does |
+|------|--------------|
+| 🎓 Learning Path | Lessons per level, quiz, progress |
+| ⏪ Chart Replay | A random instrument (name and dates hidden) stops at a past date; buy or sell with stop/target, or skip; the next 20 days are revealed and scored in R |
+| 💼 Demo Account | Paper trading as above |
+| 📊 Price Chart | Candles, SMA 20/50/200, RSI 14, ATR 14 in pips |
+| 🧮 Lot Calculator | Stop distance in pips, pip value, exact lot, fixed lot to use, risk and margin for every fixed size |
+
+Progress and the demo account are stored locally in `state/webapp/` (git-ignored).
 
 ## Languages
 
 English, Bahasa Melayu, தமிழ் (Tamil) and 中文 (Simplified Chinese). Pick one in the
 sidebar; it is kept in the `?lang=` URL parameter (`en`, `ms`, `ta`, `zh`). All strings live
 in `core/i18n.py`, and `tests/test_i18n.py` fails if a key is missing a language or its
-placeholders differ. Output produced by the skills themselves (breadth signals, catalog
-descriptions, the position-sizer markdown report) stays in English.
-
-## Demo account types
-
-| Type | Balance options | Display |
-|------|-----------------|---------|
-| Standard | $100 – $1,000 USD | `$1,000.00` |
-| Cent | 10,000 – 1,000,000 USC ($100 – $10,000) | `100,000 USC` |
-
-Fractional shares (up to 4 decimals) are allowed so small balances can trade high-priced
-stocks. Amounts are stored in USD; a cent account only displays them ×100.
-
-## Training (zero → advanced)
-
-| Level | Focus | Unlocks when | Max risk / demo trade |
-|-------|-------|--------------|-----------------------|
-| 1 Beginner | Candles, trend, support/resistance, stop-loss, 1% rule | Basics quiz ≥ 80% | 0.5% |
-| 2 Risk Control | R-multiples, reward:risk, position sizing | 10 Chart Replay trades | 1% |
-| 3 Trend & Context | Market breadth, RSI/ATR, expectancy | 10 closed demo trades with positive expectancy | 1% |
-| 4 Advanced | Screeners and setups from the skill catalog | (top level) | 2% |
-
-| Page | What it does |
-|------|--------------|
-| 🎓 Learning Path | Lessons per level, quiz, progress toward the next level |
-| ⏪ Chart Replay | A random stock (ticker and dates hidden) stops at a past date; buy with stop/target or skip, then the next 20 days are revealed and scored in R |
-| 💼 Demo Account | Paper trading on real daily prices. Long only, stop-loss and a written reason required, risk capped by level, pre-trade checklist, stops/targets auto-checked on each new daily bar, journal and equity curve |
-
-Progress and the demo account are stored locally in `state/webapp/` (git-ignored).
-Replay fills are conservative: gaps through the stop fill at the open, and a bar that
-touches both stop and target counts as a stop.
-
-## Tools
-
-| Page | What it does | Skill / data source | API key |
-|------|--------------|---------------------|---------|
-| 📊 Price Chart | Candles, SMA 20/50/200, volume, RSI 14, ATR 14 | Twelve Data, falls back to yfinance | Optional (`TWELVEDATA_API_KEY`) |
-| 🧮 Position Sizer | Share count from stop-loss, ATR or Kelly, with portfolio constraints | `skills/position-sizer` | None |
-| 🌡️ Market Breadth | 0–100 breadth health score, components, key levels | `skills/market-breadth-analyzer` (public CSV) | None |
-| 📚 Skill Catalog | Browse and filter every skill by category and paid-API need | `skills-index.yaml` | None |
-
-The Price Chart page can pass the latest close and ATR straight into the Position Sizer.
+placeholders differ.
 
 ## Run
 
@@ -60,31 +75,22 @@ pip install -r webapp/requirements.txt
 streamlit run webapp/app.py
 ```
 
-Open http://localhost:8501.
-
-### Optional environment variables
-
-| Variable | Purpose |
-|----------|---------|
-| `TWELVEDATA_API_KEY` | Twelve Data key for price data (free tier works). Without it, yfinance is used. |
-| `BREADTH_DETAIL_URL`, `BREADTH_SUMMARY_URL` | Point Market Breadth at a CSV mirror instead of the default public URLs. |
-
-Market Breadth reports are written to `reports/webapp/market_breadth/` (git-ignored).
+Open http://localhost:8501. Set `TWELVEDATA_API_KEY` (free tier) for forex, gold and BTC;
+without it, Yahoo Finance is used for everything.
 
 ## Layout
 
 ```
 webapp/
-├── app.py            # Streamlit entry point and navigation
-├── core/             # Pure logic, no Streamlit (unit tested)
-│   ├── catalog.py    # skills-index.yaml loader + filters
-│   ├── sizing.py     # position-sizer skill wrapper
-│   ├── breadth.py    # market-breadth-analyzer runner + report parser
-│   ├── training.py   # levels, lessons, quiz, replay scoring, progress
-│   ├── demo_account.py # paper-trading ledger and risk rules
-│   ├── prices.py     # Twelve Data / yfinance OHLCV fetch
-│   └── indicators.py # SMA, RSI, ATR
-├── views/            # One module per page
+├── app.py              # Streamlit entry point, navigation, language picker
+├── core/               # Pure logic, no Streamlit (unit tested)
+│   ├── instruments.py  # contract specs, pip value, margin, fixed lot sizes
+│   ├── demo_account.py # leveraged paper-trading ledger, stop-out
+│   ├── training.py     # levels, quiz answers, replay scoring, progress
+│   ├── i18n.py         # all UI text in four languages
+│   ├── prices.py       # Twelve Data / Yahoo daily OHLC
+│   └── indicators.py   # SMA, RSI, ATR
+├── views/              # One module per page + shared helpers
 └── tests/
 ```
 
@@ -93,12 +99,3 @@ webapp/
 ```bash
 python3 -m pytest webapp/tests -q
 ```
-
-## Adding a skill page
-
-1. Put the logic in `core/<name>.py`. Import the skill script or run it as a subprocess
-   with `--output-dir`, then read its JSON report.
-2. Add tests in `tests/`.
-3. Create `views/<name>_page.py` with a `render()` function and register it in `app.py`.
-
-> For education and analysis only. This is not financial advice.

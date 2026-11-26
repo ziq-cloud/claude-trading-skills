@@ -55,12 +55,31 @@ def fetch_yfinance(symbol: str, period: str = "2y") -> pd.DataFrame:
         import yfinance as yf
     except ImportError as exc:
         raise PriceDataError("yfinance not installed (pip install yfinance)") from exc
-    df = yf.Ticker(symbol).history(period=period, interval="1d", auto_adjust=False)
+    try:
+        df = yf.Ticker(symbol).history(period=period, interval="1d", auto_adjust=False)
+    except Exception as exc:  # network/proxy/parse errors from yfinance's HTTP stack
+        raise PriceDataError(f"yfinance request failed: {exc}") from exc
     if df is None or df.empty:
         raise PriceDataError(f"yfinance returned no data for {symbol}")
     df = df.rename(columns=str.lower)[["open", "high", "low", "close", "volume"]]
     df.index = pd.to_datetime(df.index).tz_localize(None)
     return df.astype(float)
+
+
+def fetch_instrument(inst, source: str = "auto") -> tuple[pd.DataFrame, str]:
+    """Daily OHLC for an instruments.Instrument: Twelve Data, then Yahoo Finance."""
+    errors = []
+    order = ["twelvedata", "yfinance"] if source == "auto" else [source]
+    for src in order:
+        try:
+            if src == "twelvedata":
+                if not inst.td_symbol:
+                    continue
+                return fetch_twelvedata(inst.td_symbol), "Twelve Data"
+            return fetch_yfinance(inst.yf_symbol), "Yahoo Finance"
+        except PriceDataError as exc:
+            errors.append(f"{src}: {exc}")
+    raise PriceDataError("; ".join(errors) or "no data source for this instrument")
 
 
 def fetch_daily(symbol: str, source: str = "auto") -> tuple[pd.DataFrame, str]:

@@ -23,13 +23,13 @@ DEMO_TRADES_FOR_LEVEL_4 = 10
 # (keys: level.<n>.name/goal/unlock, lesson.<id>.title/body, quiz.<i>.q/opts).
 LEVELS = {
     1: {"max_risk_pct": 0.5, "lessons": ["candles", "trend", "sr", "stoploss", "onepct"]},
-    2: {"max_risk_pct": 1.0, "lessons": ["rmultiple", "rr", "sizing"]},
-    3: {"max_risk_pct": 1.0, "lessons": ["breadth", "rsi_atr", "expectancy"]},
+    2: {"max_risk_pct": 1.0, "lessons": ["rmultiple", "rr", "sizing", "leverage"]},
+    3: {"max_risk_pct": 1.0, "lessons": ["news", "rsi_atr", "expectancy"]},
     4: {"max_risk_pct": 2.0, "lessons": ["setups", "process"]},
 }
 
 # Correct option index for each question (quiz.1 … quiz.5 in i18n).
-QUIZ = [{"answer": 0}, {"answer": 1}, {"answer": 2}, {"answer": 3}, {"answer": 0}]
+QUIZ = [{"answer": 0}, {"answer": 1}, {"answer": 1}, {"answer": 3}, {"answer": 0}]
 
 
 @dataclass
@@ -70,31 +70,42 @@ def current_level(progress: Progress, demo_closed: list[dict]) -> int:
     return 4
 
 
-def evaluate_trade(entry: float, stop: float, target: float, future: pd.DataFrame) -> dict:
-    """Simulate a long trade over future daily bars.
+def evaluate_trade(
+    entry: float, stop: float, target: float, future: pd.DataFrame, side: str = "buy"
+) -> dict:
+    """Simulate a trade over future daily bars.
 
     Conservative fills: a gap through the stop fills at the open; if one bar touches
     both stop and target, the stop is assumed to hit first. If neither level is hit,
     the trade exits at the last bar's close.
     """
-    if stop >= entry:
-        raise ValueError("Stop must be below entry for a long trade")
-    if target <= entry:
-        raise ValueError("Target must be above entry")
-    risk = entry - stop
+    if side not in ("buy", "sell"):
+        raise ValueError("side must be 'buy' or 'sell'")
+    d = 1 if side == "buy" else -1
+    if (entry - stop) * d <= 0:
+        raise ValueError("Stop must be on the losing side of the entry")
+    if (target - entry) * d <= 0:
+        raise ValueError("Target must be on the winning side of the entry")
+    risk = abs(entry - stop)
     outcome, exit_price, held = "time", float(future["close"].iloc[-1]), len(future)
     for i, bar in enumerate(future.itertuples(), start=1):
-        if bar.low <= stop:
-            outcome, exit_price, held = "stop", float(min(bar.open, stop)), i
+        if d == 1:
+            hit_stop, hit_target = bar.low <= stop, bar.high >= target
+            stop_fill, target_fill = min(bar.open, stop), max(bar.open, target)
+        else:
+            hit_stop, hit_target = bar.high >= stop, bar.low <= target
+            stop_fill, target_fill = max(bar.open, stop), min(bar.open, target)
+        if hit_stop:
+            outcome, exit_price, held = "stop", float(stop_fill), i
             break
-        if bar.high >= target:
-            outcome, exit_price, held = "target", float(max(bar.open, target)), i
+        if hit_target:
+            outcome, exit_price, held = "target", float(target_fill), i
             break
     return {
         "outcome": outcome,
         "exit_price": exit_price,
         "bars_held": held,
-        "r_multiple": (exit_price - entry) / risk,
+        "r_multiple": (exit_price - entry) * d / risk,
     }
 
 

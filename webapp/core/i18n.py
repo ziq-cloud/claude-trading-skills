@@ -2,7 +2,7 @@
 
 Every key maps to one value per language. Values are str.format templates (placeholders
 must match across languages; tests enforce this) or, for quiz options, lists.
-Skill output (breadth signals, catalog summaries) comes from the skills in English.
+
 """
 
 from __future__ import annotations
@@ -25,9 +25,6 @@ STRINGS: dict[str, dict] = {
     "nav.replay": L("Chart Replay", "Ulang Tayang Carta", "விளக்கப்பட மறுஇயக்கம்", "图表回放"),
     "nav.demo": L("Demo Account", "Akaun Demo", "டெமோ கணக்கு", "模拟账户"),
     "nav.chart": L("Price Chart", "Carta Harga", "விலை விளக்கப்படம்", "价格图表"),
-    "nav.sizer": L("Position Sizer", "Kalkulator Saiz Posisi", "நிலை அளவு கணிப்பான்", "仓位计算器"),
-    "nav.breadth": L("Market Breadth", "Keluasan Pasaran", "சந்தை அகலம்", "市场广度"),
-    "nav.catalog": L("Skill Catalog", "Katalog Skill", "திறன் பட்டியல்", "技能目录"),
     "side.level": L(
         "Level {n}: {name}", "Tahap {n}: {name}", "நிலை {n}: {name}", "第 {n} 级：{name}"
     ),
@@ -45,7 +42,6 @@ STRINGS: dict[str, dict] = {
     "common.target": L("Target", "Sasaran", "இலக்கு", "目标"),
     "common.win_rate": L("Win rate", "Kadar menang", "வெற்றி விகிதம்", "胜率"),
     "common.expectancy": L("Expectancy", "Jangkaan", "எதிர்பார்ப்பு", "期望值"),
-    "common.ticker": L("Ticker", "Simbol saham", "பங்கு குறியீடு", "股票代码"),
     "common.price_error": L(
         "Could not load price data. Set TWELVEDATA_API_KEY or install yfinance.",
         "Data harga tidak dapat dimuatkan. Tetapkan TWELVEDATA_API_KEY atau pasang yfinance.",
@@ -77,21 +73,6 @@ STRINGS: dict[str, dict] = {
         "கற்றல் பாதையைத் தொடரவும் →",
         "继续学习路径 →",
     ),
-    "home.m_skills": L(
-        "Skills in catalog", "Skill dalam katalog", "பட்டியலில் உள்ள திறன்கள்", "目录中的技能"
-    ),
-    "home.m_free": L(
-        "Work without a paid API",
-        "Tanpa API berbayar",
-        "கட்டண API இல்லாமல் இயங்கும்",
-        "无需付费 API",
-    ),
-    "home.m_paid": L(
-        "Need FMP / FINVIZ / Alpaca",
-        "Perlu FMP / FINVIZ / Alpaca",
-        "FMP / FINVIZ / Alpaca தேவை",
-        "需要 FMP / FINVIZ / Alpaca",
-    ),
     "home.tools": L("What you can do", "Apa yang boleh dibuat", "நீங்கள் செய்யக்கூடியவை", "功能一览"),
     "home.desc.replay": L(
         "Practise entries on hidden historical charts.",
@@ -104,30 +85,6 @@ STRINGS: dict[str, dict] = {
         "Dagangan kertas dengan wang maya pada harga sebenar.",
         "உண்மையான விலைகளில் மெய்நிகர் பணத்துடன் காகித வர்த்தகம்.",
         "用虚拟资金按真实价格进行模拟交易。",
-    ),
-    "home.desc.chart": L(
-        "Candles, SMA 20/50/200, RSI and ATR for any ticker.",
-        "Lilin, SMA 20/50/200, RSI dan ATR untuk mana-mana saham.",
-        "எந்தப் பங்குக்கும் மெழுகுவர்த்திகள், SMA 20/50/200, RSI மற்றும் ATR.",
-        "任意股票的K线、SMA 20/50/200、RSI 和 ATR。",
-    ),
-    "home.desc.sizer": L(
-        "Risk-based share count: fixed %, ATR or Kelly.",
-        "Bilangan saham berasaskan risiko: % tetap, ATR atau Kelly.",
-        "இடர் அடிப்படையிலான பங்கு எண்ணிக்கை: நிலையான %, ATR அல்லது Kelly.",
-        "基于风险的股数：固定比例、ATR 或凯利公式。",
-    ),
-    "home.desc.breadth": L(
-        "0–100 market health score from public data.",
-        "Skor kesihatan pasaran 0–100 daripada data awam.",
-        "பொது தரவிலிருந்து 0–100 சந்தை ஆரோக்கிய மதிப்பெண்.",
-        "基于公开数据的 0–100 市场健康评分。",
-    ),
-    "home.desc.catalog": L(
-        "Browse all skills, filter by category and API need.",
-        "Semak semua skill, tapis mengikut kategori dan keperluan API.",
-        "அனைத்து திறன்களையும் பார்க்கவும்; வகை மற்றும் API தேவைப்படி வடிகட்டவும்.",
-        "浏览所有技能，按类别和 API 需求筛选。",
     ),
     "home.path": L(
         "Path: **Learning Path** (lessons + quiz) → **Chart Replay** (10 practice trades) → "
@@ -183,12 +140,6 @@ STRINGS: dict[str, dict] = {
         "以正期望值平仓 {n} 笔模拟交易。",
     ),
     "level.4.name": L("Advanced", "Lanjutan", "மேம்பட்டது", "进阶"),
-    "level.4.goal": L(
-        "Use the screeners and setups to build a repeatable process.",
-        "Gunakan screener dan setup untuk membina proses yang boleh diulang.",
-        "மீண்டும் செய்யக்கூடிய செயல்முறையை உருவாக்க ஸ்கிரீனர்கள் மற்றும் அமைப்புகளைப் பயன்படுத்துங்கள்.",
-        "使用选股器和交易形态，建立可重复的流程。",
-    ),
     "level.4.unlock": L("Top level.", "Tahap tertinggi.", "உயர்ந்த நிலை.", "最高级别。"),
     # ------------------------------------------------------------------ lessons
     "lesson.candles.title": L("Candlesticks", "Lilin (candlestick)", "மெழுகுவர்த்தி வரைபடம்", "K线"),
@@ -256,20 +207,6 @@ STRINGS: dict[str, dict] = {
         "止损是证明你的判断错误、必须离场的价格。没有止损，一笔糟糕的交易就可能抹掉几个月的"
         "利润。在本应用中，没有止损**无法**开立模拟交易。",
     ),
-    "lesson.onepct.title": L("The 1% rule", "Peraturan 1%", "1% விதி", "1% 法则"),
-    "lesson.onepct.body": L(
-        "Risk a small, fixed slice of your account per trade, e.g. 0.5–1%. With $1,000 and 1% "
-        "risk you may lose at most $10 if the stop is hit. Ten losses in a row then cost about "
-        "10%, which you can recover from.",
-        "Risikokan bahagian kecil yang tetap bagi akaun anda untuk setiap dagangan, contohnya "
-        "0.5–1%. Dengan $1,000 dan risiko 1%, kerugian maksimum ialah $10 jika henti rugi kena. "
-        "Sepuluh kerugian berturut-turut hanya kira-kira 10%, yang masih boleh dipulihkan.",
-        "ஒவ்வொரு வர்த்தகத்திலும் உங்கள் கணக்கின் சிறிய, நிலையான பகுதியை மட்டும் இடருக்கு "
-        "உட்படுத்துங்கள், எ.கா. 0.5–1%. $1,000 மற்றும் 1% இடருடன், நிறுத்தம் தொட்டால் அதிகபட்சம் "
-        "$10 இழப்பீர்கள். தொடர்ந்து பத்து இழப்புகள் சுமார் 10% மட்டுமே — அதிலிருந்து மீளலாம்.",
-        "每笔交易只拿账户中一小部分固定比例去冒险，例如 0.5–1%。账户 $1,000、风险 1% 时，"
-        "触发止损最多亏 $10。即使连亏十次也只损失约 10%，仍然可以恢复。",
-    ),
     "lesson.rmultiple.title": L("R-multiples", "Gandaan R", "R-மடங்குகள்", "R 倍数"),
     "lesson.rmultiple.body": L(
         "**1R** is the amount you risk (entry − stop). A trade that gains twice the risk is "
@@ -297,29 +234,6 @@ STRINGS: dict[str, dict] = {
         "目标至少设为 2R。盈利单为 2R 时，即使胜率只有 40% 也能赚钱："
         "0.4 × 2 − 0.6 × 1 = 每笔 +0.2R。",
     ),
-    "lesson.sizing.title": L("Position sizing", "Saiz posisi", "நிலை அளவு", "仓位大小"),
-    "lesson.sizing.body": L(
-        "Shares = (account × risk %) ÷ (entry − stop). Use the **Position Sizer** page or the "
-        "ATR method: stop = entry − 2 × ATR. Small accounts can use fractional shares.",
-        "Bilangan saham = (akaun × % risiko) ÷ (masuk − henti rugi). Gunakan halaman "
-        "**Kalkulator Saiz Posisi** atau kaedah ATR: henti rugi = masuk − 2 × ATR. Akaun kecil "
-        "boleh guna saham pecahan.",
-        "பங்குகள் = (கணக்கு × இடர் %) ÷ (நுழைவு − நிறுத்தம்). **நிலை அளவு கணிப்பான்** பக்கத்தை "
-        "அல்லது ATR முறையைப் பயன்படுத்துங்கள்: நிறுத்தம் = நுழைவு − 2 × ATR. சிறிய கணக்குகள் "
-        "பகுதிப் பங்குகளைப் பயன்படுத்தலாம்.",
-        "股数 =（账户 × 风险%）÷（入场价 − 止损价）。可使用**仓位计算器**页面，或 ATR 方法："
-        "止损 = 入场价 − 2 × ATR。小账户可以使用零碎股。",
-    ),
-    "lesson.breadth.title": L("Market breadth", "Keluasan pasaran", "சந்தை அகலம்", "市场广度"),
-    "lesson.breadth.body": L(
-        "Most stocks follow the overall market. Check **Market Breadth** before trading: a weak "
-        "score means smaller size or fewer trades.",
-        "Kebanyakan saham mengikut pasaran keseluruhan. Semak **Keluasan Pasaran** sebelum "
-        "berdagang: skor lemah bermaksud saiz lebih kecil atau kurangkan dagangan.",
-        "பெரும்பாலான பங்குகள் ஒட்டுமொத்த சந்தையைப் பின்பற்றும். வர்த்தகத்திற்கு முன் **சந்தை "
-        "அகலம்** பார்க்கவும்: பலவீனமான மதிப்பெண் என்றால் சிறிய அளவு அல்லது குறைவான வர்த்தகங்கள்.",
-        "大多数股票跟随大盘。交易前先看**市场广度**：评分偏弱时应缩小仓位或减少交易。",
-    ),
     "lesson.rsi_atr.title": L("RSI and ATR", "RSI dan ATR", "RSI மற்றும் ATR", "RSI 与 ATR"),
     "lesson.rsi_atr.body": L(
         "**RSI** above 70 is stretched, below 30 is washed out; in uptrends, pullbacks to 40–50 "
@@ -346,17 +260,6 @@ STRINGS: dict[str, dict] = {
         "நாட்குறிப்பை வைத்திருங்கள் (டெமோ கணக்கு இதைச் செய்யும்) மற்றும் இழப்புகளை ஆய்வு செய்யுங்கள்.",
         "期望值 = 每笔交易的平均 R，它比胜率更重要。坚持写交易日志（模拟账户会自动记录），"
         "并复盘亏损的交易。",
-    ),
-    "lesson.setups.title": L("Setups", "Setup dagangan", "வர்த்தக அமைப்புகள்", "交易形态"),
-    "lesson.setups.body": L(
-        "Explore the **Skill Catalog**: VCP Screener, Breakout Trade Planner, PEAD Screener, "
-        "CANSLIM and others encode specific, testable entry rules.",
-        "Terokai **Katalog Skill**: VCP Screener, Breakout Trade Planner, PEAD Screener, CANSLIM "
-        "dan lain-lain mengandungi peraturan kemasukan khusus yang boleh diuji.",
-        "**திறன் பட்டியலை** ஆராயுங்கள்: VCP Screener, Breakout Trade Planner, PEAD Screener, "
-        "CANSLIM போன்றவை குறிப்பிட்ட, சோதிக்கக்கூடிய நுழைவு விதிகளைக் கொண்டுள்ளன.",
-        "浏览**技能目录**：VCP Screener、Breakout Trade Planner、PEAD Screener、CANSLIM "
-        "等都包含具体、可检验的入场规则。",
     ),
     "lesson.process.title": L(
         "Process over outcome",
@@ -412,18 +315,6 @@ STRINGS: dict[str, dict] = {
             "RSI 70க்கு மேல்",
         ],
         ["高点和低点不断降低", "高点和低点不断抬高", "价格在区间内横盘", "RSI 高于 70"],
-    ),
-    "quiz.3.q": L(
-        "Account $1,000, risk 1%, entry $50, stop $48. How many shares?",
-        "Akaun $1,000, risiko 1%, masuk $50, henti rugi $48. Berapa saham?",
-        "கணக்கு $1,000, இடர் 1%, நுழைவு $50, நிறுத்தம் $48. எத்தனை பங்குகள்?",
-        "账户 $1,000，风险 1%，入场 $50，止损 $48。应买多少股？",
-    ),
-    "quiz.3.opts": L(
-        ["2", "20", "5", "10"],
-        ["2", "20", "5", "10"],
-        ["2", "20", "5", "10"],
-        ["2", "20", "5", "10"],
     ),
     "quiz.4.q": L(
         "When should you decide on your stop-loss?",
@@ -538,27 +429,8 @@ STRINGS: dict[str, dict] = {
         "💼 Open Demo Account", "💼 Buka Akaun Demo", "💼 டெமோ கணக்கைத் திறக்கவும்", "💼 打开模拟账户"
     ),
     # ------------------------------------------------------------------ replay page
-    "replay.intro": L(
-        "A random stock is shown up to a hidden point in the past. Decide: buy with a stop and "
-        "target, or skip. Then the next {h} days are revealed. Ticker and dates are hidden so "
-        "you judge the chart, not the name.",
-        "Saham rawak ditunjukkan sehingga satu titik tersembunyi pada masa lalu. Buat keputusan: "
-        "beli dengan henti rugi dan sasaran, atau langkau. Kemudian {h} hari seterusnya "
-        "didedahkan. Nama saham dan tarikh disembunyikan supaya anda menilai carta, bukan nama.",
-        "ஒரு சீரற்ற பங்கு கடந்த காலத்தின் மறைக்கப்பட்ட புள்ளி வரை காட்டப்படும். முடிவு செய்யுங்கள்: "
-        "நிறுத்தம் மற்றும் இலக்குடன் வாங்கவும், அல்லது தவிர்க்கவும். பின் அடுத்த {h} நாட்கள் "
-        "வெளிப்படுத்தப்படும். பெயரை அல்ல, விளக்கப்படத்தை மதிப்பிட குறியீடும் தேதிகளும் மறைக்கப்படும்.",
-        "系统随机显示一只股票截至过去某个隐藏时点的走势。请决定：设好止损和目标后买入，或者跳过。"
-        "随后揭晓接下来 {h} 天的走势。股票代码和日期都被隐藏，让你只看图表、不看名字。",
-    ),
     "replay.m_trades": L("Replay trades", "Dagangan ulang tayang", "மறுஇயக்க வர்த்தகங்கள்", "回放交易"),
     "replay.m_total": L("Total", "Jumlah", "மொத்தம்", "合计"),
-    "replay.caption": L(
-        "Last close **{close}** · ATR(14) **{atr}** · RSI(14) **{rsi}**",
-        "Harga tutup terakhir **{close}** · ATR(14) **{atr}** · RSI(14) **{rsi}**",
-        "கடைசி முடிவு விலை **{close}** · ATR(14) **{atr}** · RSI(14) **{rsi}**",
-        "最新收盘价 **{close}** · ATR(14) **{atr}** · RSI(14) **{rsi}**",
-    ),
     "replay.reason": L(
         "Why this trade? (one line)",
         "Kenapa dagangan ini? (satu baris)",
@@ -570,12 +442,6 @@ STRINGS: dict[str, dict] = {
         "Risiko {risk} · ganjaran {reward} · R:R = {rr}",
         "இடர் {risk} · வெகுமதி {reward} · R:R = {rr}",
         "风险 {risk} · 回报 {reward} · 盈亏比 = {rr}",
-    ),
-    "replay.buy": L(
-        "🟢 Buy at last close",
-        "🟢 Beli pada harga tutup terakhir",
-        "🟢 கடைசி முடிவு விலையில் வாங்கவும்",
-        "🟢 以最新收盘价买入",
     ),
     "replay.skip": L(
         "⏭ Skip — no trade", "⏭ Langkau — tiada dagangan", "⏭ தவிர் — வர்த்தகம் இல்லை", "⏭ 跳过——不交易"
@@ -628,23 +494,6 @@ STRINGS: dict[str, dict] = {
         "K线（日期已隐藏）",
     ),
     # ------------------------------------------------------------------ demo page
-    "demo.caption": L(
-        "Level {n} · {name} — max risk per trade **{pct}%**. Long trades only. Every trade "
-        "needs a stop-loss and a reason. Fractional shares allowed.",
-        "Tahap {n} · {name} — risiko maks setiap dagangan **{pct}%**. Beli (long) sahaja. Setiap "
-        "dagangan perlu henti rugi dan sebab. Saham pecahan dibenarkan.",
-        "நிலை {n} · {name} — ஒரு வர்த்தகத்திற்கு அதிகபட்ச இடர் **{pct}%**. வாங்கும் (long) "
-        "வர்த்தகங்கள் மட்டும். ஒவ்வொரு வர்த்தகத்திற்கும் நிறுத்த இழப்பும் காரணமும் தேவை. "
-        "பகுதிப் பங்குகள் அனுமதிக்கப்படும்.",
-        "第 {n} 级 · {name} — 单笔最大风险 **{pct}%**。仅限做多。每笔交易都需要止损和理由。"
-        "允许零碎股。",
-    ),
-    "demo.setup": L(
-        "Start a paper-trading account with virtual money. Prices are real daily closes.",
-        "Mulakan akaun dagangan kertas dengan wang maya. Harga ialah harga tutup harian sebenar.",
-        "மெய்நிகர் பணத்துடன் காகித வர்த்தகக் கணக்கைத் தொடங்குங்கள். விலைகள் உண்மையான தினசரி முடிவு விலைகள்.",
-        "用虚拟资金开设模拟交易账户。价格为真实的每日收盘价。",
-    ),
     "demo.type": L("Account type", "Jenis akaun", "கணக்கு வகை", "账户类型"),
     "demo.type.standard": L(
         "Standard (USD): $100 – $1,000",
@@ -677,7 +526,6 @@ STRINGS: dict[str, dict] = {
         "账户：**{type}** · 初始资金 {start}",
     ),
     "demo.m_equity": L("Equity", "Ekuiti", "ஈக்விட்டி", "净值"),
-    "demo.m_cash": L("Cash", "Tunai", "ரொக்கம்", "现金"),
     "demo.m_closed": L("Closed trades", "Dagangan ditutup", "மூடப்பட்ட வர்த்தகங்கள்", "已平仓交易"),
     "demo.tab_new": L("New trade", "Dagangan baru", "புதிய வர்த்தகம்", "新交易"),
     "demo.tab_open": L("Open ({n})", "Terbuka ({n})", "திறந்தவை ({n})", "持仓 ({n})"),
@@ -692,15 +540,6 @@ STRINGS: dict[str, dict] = {
     "demo.reset_btn": L(
         "Reset demo account", "Set semula akaun demo", "டெமோ கணக்கை மீட்டமைக்கவும்", "重置模拟账户"
     ),
-    "demo.placeholder": L("e.g. AAPL", "cth. AAPL", "எ.கா. AAPL", "例如 AAPL"),
-    "demo.quote": L("Get quote", "Dapatkan harga", "விலையைப் பெறவும்", "获取报价"),
-    "demo.quote_line": L(
-        "**{sym}** last close **{close}** ({date}) · ATR {atr} · RSI {rsi} · trend: {trend}",
-        "**{sym}** harga tutup terakhir **{close}** ({date}) · ATR {atr} · RSI {rsi} · trend: "
-        "{trend}",
-        "**{sym}** கடைசி முடிவு விலை **{close}** ({date}) · ATR {atr} · RSI {rsi} · போக்கு: {trend}",
-        "**{sym}** 最新收盘价 **{close}**（{date}）· ATR {atr} · RSI {rsi} · 趋势：{trend}",
-    ),
     "demo.trend_up": L(
         "🟢 up (above 50 & 200 SMA)",
         "🟢 naik (atas SMA 50 & 200)",
@@ -712,19 +551,6 @@ STRINGS: dict[str, dict] = {
         "🟠 bukan trend menaik yang jelas",
         "🟠 தெளிவான ஏறுமுகம் இல்லை",
         "🟠 并非明确的上升趋势",
-    ),
-    "demo.shares": L("Shares", "Bilangan saham", "பங்குகள்", "股数"),
-    "demo.shares_help": L(
-        "Default = most shares allowed by your {pct}% risk limit and your cash.",
-        "Lalai = bilangan saham maksimum yang dibenarkan oleh had risiko {pct}% dan tunai anda.",
-        "இயல்புநிலை = உங்கள் {pct}% இடர் வரம்பும் ரொக்கமும் அனுமதிக்கும் அதிகபட்ச பங்குகள்.",
-        "默认值 = 在 {pct}% 风险上限和现金允许范围内的最大股数。",
-    ),
-    "demo.risk_preview": L(
-        "Cost {cost} · risk {risk} ({pct}% of equity)",
-        "Kos {cost} · risiko {risk} ({pct}% daripada ekuiti)",
-        "செலவு {cost} · இடர் {risk} (ஈக்விட்டியின் {pct}%)",
-        "成本 {cost} · 风险 {risk}（占净值 {pct}%）",
     ),
     "demo.reason": L(
         "Why are you taking this trade? (required)",
@@ -750,12 +576,6 @@ STRINGS: dict[str, dict] = {
         "வெகுமதி இடரின் குறைந்தது 2 மடங்கு",
         "潜在回报至少是风险的 2 倍",
     ),
-    "demo.chk3": L(
-        "I checked the overall market (Market Breadth)",
-        "Saya sudah semak pasaran keseluruhan (Keluasan Pasaran)",
-        "ஒட்டுமொத்த சந்தையைச் சரிபார்த்தேன் (சந்தை அகலம்)",
-        "我已检查大盘（市场广度）",
-    ),
     "demo.buy": L(
         "Buy at last close",
         "Beli pada harga tutup terakhir",
@@ -774,18 +594,6 @@ STRINGS: dict[str, dict] = {
         "முதலில் அனைத்து சரிபார்ப்பு உருப்படிகளையும் குறிக்கவும்.",
         "请先勾选所有检查项。",
     ),
-    "demo.bought": L(
-        "Bought {shares} {sym} at {price}. Risk {risk} ({pct}%).",
-        "Membeli {shares} {sym} pada {price}. Risiko {risk} ({pct}%).",
-        "{sym} இன் {shares} பங்குகள் {price} இல் வாங்கப்பட்டன. இடர் {risk} ({pct}%).",
-        "已以 {price} 买入 {shares} 股 {sym}。风险 {risk}（{pct}%）。",
-    ),
-    "demo.err.shares": L(
-        "Shares must be more than zero.",
-        "Bilangan saham mesti lebih daripada sifar.",
-        "பங்குகள் பூஜ்ஜியத்தை விட அதிகமாக இருக்க வேண்டும்.",
-        "股数必须大于零。",
-    ),
     "demo.err.stop": L(
         "A stop-loss below the entry price is required.",
         "Henti rugi di bawah harga masuk diperlukan.",
@@ -797,27 +605,6 @@ STRINGS: dict[str, dict] = {
         "Sasaran mesti di atas harga masuk.",
         "இலக்கு நுழைவு விலைக்கு மேல் இருக்க வேண்டும்.",
         "目标价必须高于入场价。",
-    ),
-    "demo.err.cash": L(
-        "Not enough cash: need {need}, have {have}.",
-        "Tunai tidak mencukupi: perlu {need}, ada {have}.",
-        "போதுமான ரொக்கம் இல்லை: தேவை {need}, உள்ளது {have}.",
-        "现金不足：需要 {need}，可用 {have}。",
-    ),
-    "demo.err.risk": L(
-        "Trade risk {pct}% exceeds your level's limit of {limit}%. Reduce shares or tighten "
-        "the stop.",
-        "Risiko dagangan {pct}% melebihi had tahap anda {limit}%. Kurangkan saham atau ketatkan "
-        "henti rugi.",
-        "வர்த்தக இடர் {pct}% உங்கள் நிலையின் {limit}% வரம்பை மீறுகிறது. பங்குகளைக் குறைக்கவும் "
-        "அல்லது நிறுத்தத்தை நெருக்கவும்.",
-        "该交易风险 {pct}% 超过你当前级别 {limit}% 的上限。请减少股数或收紧止损。",
-    ),
-    "demo.toast": L(
-        "{sym}: {reason} at {price} ({r}R)",
-        "{sym}: {reason} pada {price} ({r}R)",
-        "{sym}: {price} இல் {reason} ({r}R)",
-        "{sym}：{reason}，价格 {price}（{r}R）",
     ),
     "demo.reason.stop": L("stop-loss hit", "henti rugi kena", "நிறுத்தம் தொடப்பட்டது", "触发止损"),
     "demo.reason.target": L("target hit", "sasaran tercapai", "இலக்கு எட்டப்பட்டது", "达到目标"),
@@ -869,13 +656,11 @@ STRINGS: dict[str, dict] = {
         "பொதுவாக விலை இடைவெளி அல்லது நகர்த்தப்பட்ட நிறுத்தத்தால் ஏற்படும்.",
         "你最差的一笔交易（{sym}）亏损 {r}R，超过了计划风险。通常是跳空或移动了止损所致。",
     ),
-    "col.symbol": L("Symbol", "Simbol", "குறியீடு", "代码"),
     "col.entry_date": L("Entry date", "Tarikh masuk", "நுழைவு தேதி", "入场日期"),
     "col.exit_date": L("Exit date", "Tarikh keluar", "வெளியேறும் தேதி", "出场日期"),
     "col.entry": L("Entry", "Masuk", "நுழைவு", "入场价"),
     "col.exit_price": L("Exit", "Keluar", "வெளியேற்றம்", "出场价"),
     "col.stop": L("Stop", "Henti rugi", "நிறுத்தம்", "止损"),
-    "col.shares": L("Shares", "Saham", "பங்குகள்", "股数"),
     "col.exit_reason": L("Exit reason", "Sebab keluar", "வெளியேறும் காரணம்", "出场原因"),
     "col.pnl": L("P&L", "Untung/Rugi", "லாபம்/நட்டம்", "盈亏"),
     "col.r_multiple": L("R", "R", "R", "R"),
@@ -885,7 +670,6 @@ STRINGS: dict[str, dict] = {
     "chart.show_last": L("Show last", "Papar terakhir", "கடைசியாகக் காட்டு", "显示最近"),
     "chart.days": L("{n} days", "{n} hari", "{n} நாட்கள்", "{n} 天"),
     "chart.close": L("Close", "Harga tutup", "முடிவு விலை", "收盘价"),
-    "chart.vs": L("price {pct}%", "harga {pct}%", "விலை {pct}%", "价格 {pct}%"),
     "chart.atr_pct": L(
         "{pct}% of price", "{pct}% daripada harga", "விலையின் {pct}%", "占价格 {pct}%"
     ),
@@ -896,231 +680,340 @@ STRINGS: dict[str, dict] = {
         "மூலம்: {src} · கடைசி பார் {date}",
         "数据源：{src} · 最新K线 {date}",
     ),
-    "chart.to_sizer": L(
-        "🧮 Use this price and ATR in Position Sizer",
-        "🧮 Guna harga dan ATR ini dalam Kalkulator Saiz Posisi",
-        "🧮 இந்த விலையையும் ATR-ஐயும் நிலை அளவு கணிப்பானில் பயன்படுத்தவும்",
-        "🧮 将此价格和 ATR 用于仓位计算器",
+    # ------------------------------------------------------------------ forex additions
+    "nav.calc": L("Lot Calculator", "Kalkulator Lot", "லாட் கணிப்பான்", "手数计算器"),
+    "home.desc.calc": L(
+        "Lot size, pip value and margin for a stop-loss and risk %.",
+        "Saiz lot, nilai pip dan margin untuk henti rugi dan % risiko.",
+        "நிறுத்த இழப்பு மற்றும் இடர் %க்கான லாட் அளவு, பிப் மதிப்பு மற்றும் மார்ஜின்.",
+        "根据止损和风险比例计算手数、点值和保证金。",
     ),
-    # ------------------------------------------------------------------ position sizer
-    "sizer.caption": L(
-        "Uses skills/position-sizer — the same calculation as the Claude skill.",
-        "Menggunakan skills/position-sizer — pengiraan yang sama seperti skill Claude.",
-        "skills/position-sizer ஐப் பயன்படுத்துகிறது — Claude திறனின் அதே கணக்கீடு.",
-        "调用 skills/position-sizer——与 Claude 技能相同的计算。",
+    "home.m_instruments": L("Instruments", "Instrumen", "கருவிகள்", "交易品种"),
+    "home.m_lots": L("Fixed lot sizes", "Saiz lot tetap", "நிலையான லாட் அளவுகள்", "固定手数"),
+    "home.m_leverage": L("Leverage", "Leverage", "லீவரேஜ்", "杠杆"),
+    "common.instrument": L("Instrument", "Instrumen", "கருவி", "交易品种"),
+    "common.buy": L("Buy", "Beli", "வாங்கு", "买入"),
+    "common.sell": L("Sell", "Jual", "விற்கு", "卖出"),
+    "common.lots": L("Lot size", "Saiz lot", "லாட் அளவு", "手数"),
+    "level.4.goal": L(
+        "Build a repeatable process: sessions, setups and a written rule set.",
+        "Bina proses yang boleh diulang: sesi pasaran, setup dan set peraturan bertulis.",
+        "மீண்டும் செய்யக்கூடிய செயல்முறையை உருவாக்குங்கள்: சந்தை அமர்வுகள், அமைப்புகள் மற்றும் எழுதப்பட்ட விதிகள்.",
+        "建立可重复的流程：交易时段、交易形态和成文的规则。",
     ),
-    "sizer.prefilled": L(
-        "Prefilled from Price Chart: {sym} entry {entry}, ATR {atr}",
-        "Diisi dari Carta Harga: {sym} masuk {entry}, ATR {atr}",
-        "விலை விளக்கப்படத்திலிருந்து நிரப்பப்பட்டது: {sym} நுழைவு {entry}, ATR {atr}",
-        "已从价格图表预填：{sym} 入场 {entry}，ATR {atr}",
+    "lesson.onepct.title": L("The 1% rule", "Peraturan 1%", "1% விதி", "1% 法则"),
+    "lesson.onepct.body": L(
+        "Risk a small, fixed slice of your account per trade, e.g. 0.5–1%. With $1,000 and 1% "
+        "risk you lose at most $10 if the stop is hit. Ten losses in a row then cost about 10%, "
+        "which you can recover from. Leverage does not change this: it only lowers the margin.",
+        "Risikokan bahagian kecil yang tetap bagi akaun anda untuk setiap dagangan, contohnya "
+        "0.5–1%. Dengan $1,000 dan risiko 1%, kerugian maksimum ialah $10 jika henti rugi kena. "
+        "Sepuluh kerugian berturut-turut hanya kira-kira 10%, yang masih boleh dipulihkan. "
+        "Leverage tidak mengubah ini: ia hanya mengurangkan margin.",
+        "ஒவ்வொரு வர்த்தகத்திலும் உங்கள் கணக்கின் சிறிய, நிலையான பகுதியை மட்டும் இடருக்கு "
+        "உட்படுத்துங்கள், எ.கா. 0.5–1%. $1,000 மற்றும் 1% இடருடன், நிறுத்தம் தொட்டால் அதிகபட்சம் "
+        "$10 இழப்பீர்கள். தொடர்ந்து பத்து இழப்புகள் சுமார் 10% மட்டுமே. லீவரேஜ் இதை மாற்றாது: "
+        "அது மார்ஜினை மட்டுமே குறைக்கும்.",
+        "每笔交易只拿账户中一小部分固定比例去冒险，例如 0.5–1%。账户 $1,000、风险 1% 时，"
+        "触发止损最多亏 $10。即使连亏十次也只损失约 10%，仍可恢复。杠杆不会改变这一点，"
+        "它只是降低了保证金。",
     ),
-    "sizer.method": L("Method", "Kaedah", "முறை", "方法"),
-    "sizer.m_stop": L(
-        "Stop-loss (fixed %)", "Henti rugi (% tetap)", "நிறுத்த இழப்பு (நிலையான %)", "止损（固定比例）"
+    "lesson.sizing.title": L(
+        "Lot size and pips", "Saiz lot dan pip", "லாட் அளவு மற்றும் பிப்கள்", "手数与点"
     ),
-    "sizer.m_atr": L("ATR-based", "Berasaskan ATR", "ATR அடிப்படை", "基于 ATR"),
-    "sizer.m_kelly": L("Kelly criterion", "Kriteria Kelly", "Kelly அளவுகோல்", "凯利公式"),
-    "sizer.account": L("Account size ($)", "Saiz akaun ($)", "கணக்கு அளவு ($)", "账户规模 ($)"),
-    "sizer.entry": L("Entry price", "Harga masuk", "நுழைவு விலை", "入场价"),
-    "sizer.stop": L("Stop price", "Harga henti rugi", "நிறுத்த விலை", "止损价"),
-    "sizer.risk_pct": L(
+    "lesson.sizing.body": L(
+        "A **pip** is 0.0001 on most pairs (0.01 on JPY pairs). On EUR/USD, 1.00 lot = $10 per "
+        "pip, 0.10 lot = $1, 0.01 lot = $0.10. Lot = risk $ ÷ (stop in pips × pip value of 1 "
+        "lot). Example: risk $10, stop 20 pips → $0.50/pip → 0.05 lot. This app only allows "
+        "fixed sizes (0.01 to 1.00), so round **down**. Use the **Lot Calculator**.",
+        "**Pip** ialah 0.0001 bagi kebanyakan pair (0.01 bagi pair JPY). Untuk EUR/USD, 1.00 lot "
+        "= $10 setiap pip, 0.10 lot = $1, 0.01 lot = $0.10. Lot = risiko $ ÷ (henti rugi dalam "
+        "pip × nilai pip 1 lot). Contoh: risiko $10, henti rugi 20 pip → $0.50/pip → 0.05 lot. "
+        "Aplikasi ini hanya membenarkan saiz tetap (0.01 hingga 1.00), jadi bundarkan **ke "
+        "bawah**. Gunakan **Kalkulator Lot**.",
+        "பெரும்பாலான ஜோடிகளில் ஒரு **பிப்** = 0.0001 (JPY ஜோடிகளில் 0.01). EUR/USD இல் 1.00 லாட் "
+        "= ஒரு பிப்புக்கு $10, 0.10 லாட் = $1, 0.01 லாட் = $0.10. லாட் = இடர் $ ÷ (பிப்களில் "
+        "நிறுத்தம் × 1 லாட்டின் பிப் மதிப்பு). உதாரணம்: இடர் $10, நிறுத்தம் 20 பிப் → $0.50/பிப் → "
+        "0.05 லாட். இந்த செயலி நிலையான அளவுகளை (0.01 முதல் 1.00) மட்டுமே அனுமதிக்கும், எனவே "
+        "**கீழ்நோக்கி** முழுமையாக்குங்கள். **லாட் கணிப்பான்** பயன்படுத்துங்கள்.",
+        "大多数货币对的 1 **点 (pip)** 是 0.0001（日元货币对是 0.01）。EUR/USD 上，1.00 手 = "
+        "每点 $10，0.10 手 = $1，0.01 手 = $0.10。手数 = 风险金额 ÷（止损点数 × 1 手点值）。"
+        "例如：风险 $10，止损 20 点 → 每点 $0.50 → 0.05 手。本应用只允许固定手数（0.01 至 "
+        "1.00），所以要**向下**取整。请使用**手数计算器**。",
+    ),
+    "lesson.leverage.title": L(
+        "Leverage and margin", "Leverage dan margin", "லீவரேஜ் மற்றும் மார்ஜின்", "杠杆与保证金"
+    ),
+    "lesson.leverage.body": L(
+        "With 1:100 leverage, 1.00 lot EUR/USD (≈ $110,000) needs only ≈ $1,100 **margin**. "
+        "Leverage lets you open bigger positions; it does not make them safer. If **margin "
+        "level** (equity ÷ used margin) falls below 50%, the account is **stopped out** and the "
+        "worst trade is closed automatically. A **cent account** trades 1/100 of a normal lot, "
+        "so small balances can still risk only 0.5–1%.",
+        "Dengan leverage 1:100, 1.00 lot EUR/USD (≈ $110,000) hanya perlukan ≈ $1,100 **margin**. "
+        "Leverage membolehkan posisi lebih besar; ia tidak menjadikannya lebih selamat. Jika "
+        "**paras margin** (ekuiti ÷ margin digunakan) jatuh bawah 50%, akaun akan **stop out** "
+        "dan dagangan paling teruk ditutup secara automatik. **Akaun cent** berdagang 1/100 "
+        "daripada lot biasa, jadi baki kecil masih boleh berisiko hanya 0.5–1%.",
+        "1:100 லீவரேஜுடன், 1.00 லாட் EUR/USD (≈ $110,000) க்கு ≈ $1,100 **மார்ஜின்** மட்டுமே "
+        "தேவை. லீவரேஜ் பெரிய நிலைகளைத் திறக்க உதவும்; அது அவற்றைப் பாதுகாப்பாக்காது. **மார்ஜின் "
+        "நிலை** (ஈக்விட்டி ÷ பயன்படுத்திய மார்ஜின்) 50%க்குக் கீழே விழுந்தால், கணக்கு **ஸ்டாப்-"
+        "அவுட்** ஆகி மோசமான வர்த்தகம் தானாக மூடப்படும். **சென்ட் கணக்கு** சாதாரண லாட்டின் 1/100 "
+        "அளவில் வர்த்தகம் செய்யும், எனவே சிறிய இருப்பிலும் 0.5–1% மட்டுமே இடர் எடுக்கலாம்.",
+        "在 1:100 杠杆下，1.00 手 EUR/USD（约 $110,000）只需约 $1,100 **保证金**。杠杆让你能开"
+        "更大的仓位，但并不会让它更安全。当**保证金水平**（净值 ÷ 已用保证金）低于 50% 时，"
+        "账户会被**强制平仓**，系统自动平掉亏损最大的交易。**美分账户**的每手只有标准手的 "
+        "1/100，因此小资金也能把风险控制在 0.5–1%。",
+    ),
+    "lesson.news.title": L(
+        "News and sessions",
+        "Berita dan sesi pasaran",
+        "செய்திகள் மற்றும் சந்தை அமர்வுகள்",
+        "新闻与交易时段",
+    ),
+    "lesson.news.body": L(
+        "Forex, gold and oil jump on high-impact news: US CPI, Non-Farm Payrolls (NFP), FOMC "
+        "rate decisions, OPEC for oil. Check an economic calendar before trading and avoid "
+        "opening trades just before these releases. Most movement happens in the London and "
+        "New York sessions (about 3 pm – 1 am Malaysia time).",
+        "Forex, emas dan minyak melonjak semasa berita berimpak tinggi: CPI AS, Non-Farm "
+        "Payrolls (NFP), keputusan kadar FOMC, OPEC untuk minyak. Semak kalendar ekonomi sebelum "
+        "berdagang dan elak membuka dagangan sejurus sebelum berita ini. Kebanyakan pergerakan "
+        "berlaku pada sesi London dan New York (kira-kira 3 petang – 1 pagi waktu Malaysia).",
+        "அதிக தாக்கம் கொண்ட செய்திகளில் ஃபாரெக்ஸ், தங்கம் மற்றும் எண்ணெய் வேகமாக நகரும்: அமெரிக்க "
+        "CPI, Non-Farm Payrolls (NFP), FOMC வட்டி முடிவுகள், எண்ணெய்க்கு OPEC. வர்த்தகத்திற்கு "
+        "முன் பொருளாதார நாட்காட்டியைப் பாருங்கள்; இந்த வெளியீடுகளுக்குச் சற்று முன் வர்த்தகம் "
+        "திறப்பதைத் தவிர்க்கவும். பெரும்பாலான அசைவு லண்டன் மற்றும் நியூயார்க் அமர்வுகளில் "
+        "(மலேசிய நேரம் சுமார் மாலை 3 – இரவு 1) நடக்கும்.",
+        "外汇、黄金和原油会因重大新闻剧烈波动：美国 CPI、非农就业 (NFP)、FOMC 利率决议、"
+        "原油还有 OPEC。交易前先看经济日历，避免在这些数据公布前开仓。大部分行情出现在伦敦和"
+        "纽约时段（约马来西亚时间下午 3 点至凌晨 1 点）。",
+    ),
+    "lesson.setups.title": L("Setups", "Setup dagangan", "வர்த்தக அமைப்புகள்", "交易形态"),
+    "lesson.setups.body": L(
+        "Pick one or two setups and master them: **trend pullback** (price above the 50 and 200 "
+        "SMA, buy a dip to the 20/50 SMA), **breakout** of a range with a stop inside the range, "
+        "or **support/resistance rejection** with a long wick. Write the exact rules down.",
+        "Pilih satu atau dua setup dan kuasainya: **anjakan dalam trend** (harga atas SMA 50 dan "
+        "200, beli semasa turun ke SMA 20/50), **breakout** daripada julat dengan henti rugi di "
+        "dalam julat, atau **penolakan sokongan/rintangan** dengan sumbu panjang. Tulis "
+        "peraturan yang tepat.",
+        "ஒன்று அல்லது இரண்டு அமைப்புகளைத் தேர்ந்து அவற்றில் தேர்ச்சி பெறுங்கள்: **போக்கு "
+        "இறக்கம்** (50 மற்றும் 200 SMA க்கு மேல் விலை, 20/50 SMA க்கு இறங்கும்போது வாங்குதல்), "
+        "வரம்பின் **பிரேக்அவுட்** (நிறுத்தம் வரம்பிற்குள்), அல்லது நீண்ட திரியுடன் **ஆதரவு/"
+        "எதிர்ப்பு நிராகரிப்பு**. சரியான விதிகளை எழுதி வையுங்கள்.",
+        "选一两种形态并练到精通：**趋势回调**（价格在 50 和 200 日均线上方，回调到 20/50 "
+        "日均线时买入）、区间**突破**（止损设在区间内），或带长影线的**支撑/阻力反转**。"
+        "把具体规则写下来。",
+    ),
+    "quiz.3.q": L(
+        "Account $1,000, risk 1%, EUR/USD stop 20 pips (1.00 lot = $10/pip). Lot size?",
+        "Akaun $1,000, risiko 1%, EUR/USD henti rugi 20 pip (1.00 lot = $10/pip). Saiz lot?",
+        "கணக்கு $1,000, இடர் 1%, EUR/USD நிறுத்தம் 20 பிப் (1.00 லாட் = $10/பிப்). லாட் அளவு?",
+        "账户 $1,000，风险 1%，EUR/USD 止损 20 点（1.00 手 = 每点 $10）。应开多少手？",
+    ),
+    "quiz.3.opts": L(
+        ["0.01", "0.05", "0.50", "1.00"],
+        ["0.01", "0.05", "0.50", "1.00"],
+        ["0.01", "0.05", "0.50", "1.00"],
+        ["0.01", "0.05", "0.50", "1.00"],
+    ),
+    "replay.buy": L("🟢 Buy", "🟢 Beli", "🟢 வாங்கு", "🟢 买入"),
+    "replay.sell": L("🔴 Sell", "🔴 Jual", "🔴 விற்கு", "🔴 卖出"),
+    "replay.caption": L(
+        "Last close **{close}** · ATR(14) **{atr}** · RSI(14) **{rsi}**. Pick a side; levels "
+        "are filled in for 1 ATR stop and 2 ATR target.",
+        "Harga tutup terakhir **{close}** · ATR(14) **{atr}** · RSI(14) **{rsi}**. Pilih arah; "
+        "paras diisi untuk henti rugi 1 ATR dan sasaran 2 ATR.",
+        "கடைசி முடிவு விலை **{close}** · ATR(14) **{atr}** · RSI(14) **{rsi}**. திசையைத் "
+        "தேர்ந்தெடுங்கள்; 1 ATR நிறுத்தம் மற்றும் 2 ATR இலக்கு நிரப்பப்படும்.",
+        "最新收盘价 **{close}** · ATR(14) **{atr}** · RSI(14) **{rsi}**。先选方向；系统会按 "
+        "1 个 ATR 止损、2 个 ATR 目标预填价位。",
+    ),
+    "replay.side": L("Direction", "Arah", "திசை", "方向"),
+    "replay.place": L("Place trade", "Buat dagangan", "வர்த்தகம் செய்", "下单"),
+    "demo.caption": L(
+        "Level {n} · {name} — max risk per trade **{pct}%**. Buy or sell, fixed lot sizes, "
+        "leverage 1:{lev}. Every trade needs a stop-loss and a reason.",
+        "Tahap {n} · {name} — risiko maks setiap dagangan **{pct}%**. Beli atau jual, saiz lot "
+        "tetap, leverage 1:{lev}. Setiap dagangan perlu henti rugi dan sebab.",
+        "நிலை {n} · {name} — ஒரு வர்த்தகத்திற்கு அதிகபட்ச இடர் **{pct}%**. வாங்கு அல்லது விற்கு, "
+        "நிலையான லாட் அளவுகள், லீவரேஜ் 1:{lev}. ஒவ்வொரு வர்த்தகத்திற்கும் நிறுத்த இழப்பும் "
+        "காரணமும் தேவை.",
+        "第 {n} 级 · {name} — 单笔最大风险 **{pct}%**。可买可卖，固定手数，杠杆 1:{lev}。"
+        "每笔交易都需要止损和理由。",
+    ),
+    "demo.m_balance": L("Balance", "Baki", "இருப்பு", "余额"),
+    "demo.m_margin": L("Used margin", "Margin digunakan", "பயன்படுத்திய மார்ஜின்", "已用保证金"),
+    "demo.m_free": L("Free margin", "Margin bebas", "இலவச மார்ஜின்", "可用保证金"),
+    "demo.m_level": L("Margin level", "Paras margin", "மார்ஜின் நிலை", "保证金水平"),
+    "demo.quote_line": L(
+        "**{sym}** last close **{close}** ({date}) · ATR {atr} · RSI {rsi} · trend: {trend}",
+        "**{sym}** harga tutup terakhir **{close}** ({date}) · ATR {atr} · RSI {rsi} · trend: "
+        "{trend}",
+        "**{sym}** கடைசி முடிவு விலை **{close}** ({date}) · ATR {atr} · RSI {rsi} · போக்கு: {trend}",
+        "**{sym}** 最新收盘价 **{close}**（{date}）· ATR {atr} · RSI {rsi} · 趋势：{trend}",
+    ),
+    "demo.trend_down": L(
+        "🔴 down (below 50 & 200 SMA)",
+        "🔴 turun (bawah SMA 50 & 200)",
+        "🔴 இறங்குமுகம் (50 & 200 SMA க்குக் கீழ்)",
+        "🔴 下降（低于 50 和 200 日均线）",
+    ),
+    "demo.lots_help": L(
+        "Fixed sizes only. Suggested = largest size within your {pct}% risk limit and free margin.",
+        "Saiz tetap sahaja. Cadangan = saiz terbesar dalam had risiko {pct}% dan margin bebas anda.",
+        "நிலையான அளவுகள் மட்டும். பரிந்துரை = உங்கள் {pct}% இடர் வரம்பு மற்றும் இலவச மார்ஜினுக்குள் "
+        "உள்ள பெரிய அளவு.",
+        "仅限固定手数。建议值 = 在 {pct}% 风险上限和可用保证金范围内的最大手数。",
+    ),
+    "demo.preview": L(
+        "Stop {pips} pips · risk {risk} ({pct}% of equity) · margin {margin}",
+        "Henti rugi {pips} pip · risiko {risk} ({pct}% ekuiti) · margin {margin}",
+        "நிறுத்தம் {pips} பிப் · இடர் {risk} (ஈக்விட்டியின் {pct}%) · மார்ஜின் {margin}",
+        "止损 {pips} 点 · 风险 {risk}（占净值 {pct}%）· 保证金 {margin}",
+    ),
+    "demo.no_lot": L(
+        "Even 0.01 lot risks more than {pct}% here, or needs more free margin. Use a cent "
+        "account, a closer stop, or another instrument.",
+        "Malah 0.01 lot pun berisiko lebih daripada {pct}% di sini, atau perlu lebih margin "
+        "bebas. Gunakan akaun cent, henti rugi lebih dekat, atau instrumen lain.",
+        "இங்கே 0.01 லாட் கூட {pct}%க்கு மேல் இடர் கொண்டது, அல்லது அதிக இலவச மார்ஜின் தேவை. "
+        "சென்ட் கணக்கு, நெருக்கமான நிறுத்தம் அல்லது வேறு கருவியைப் பயன்படுத்துங்கள்.",
+        "此处即使 0.01 手的风险也超过 {pct}%，或可用保证金不足。请改用美分账户、更近的止损，"
+        "或其他品种。",
+    ),
+    "demo.chk3": L(
+        "I checked the economic calendar for high-impact news",
+        "Saya sudah semak kalendar ekonomi untuk berita berimpak tinggi",
+        "அதிக தாக்கச் செய்திகளுக்காக பொருளாதார நாட்காட்டியைச் சரிபார்த்தேன்",
+        "我已查看经济日历中的重大新闻",
+    ),
+    "demo.place": L(
+        "{side} {lots} lot {sym} at {price}",
+        "{side} {lots} lot {sym} pada {price}",
+        "{price} இல் {sym} {lots} லாட் {side}",
+        "以 {price} {side} {lots} 手 {sym}",
+    ),
+    "demo.opened": L(
+        "Opened: {side} {lots} lot {sym} at {price}. Risk {risk} ({pct}%).",
+        "Dibuka: {side} {lots} lot {sym} pada {price}. Risiko {risk} ({pct}%).",
+        "திறக்கப்பட்டது: {price} இல் {sym} {lots} லாட் {side}. இடர் {risk} ({pct}%).",
+        "已开仓：以 {price} {side} {lots} 手 {sym}。风险 {risk}（{pct}%）。",
+    ),
+    "demo.toast": L(
+        "{sym}: {reason} at {price} ({r}R)",
+        "{sym}: {reason} pada {price} ({r}R)",
+        "{sym}: {price} இல் {reason} ({r}R)",
+        "{sym}：{reason}，价格 {price}（{r}R）",
+    ),
+    "demo.reason.stop_out": L(
+        "stop-out (margin level below 50%)",
+        "stop out (paras margin bawah 50%)",
+        "ஸ்டாப்-அவுட் (மார்ஜின் நிலை 50%க்குக் கீழ்)",
+        "强制平仓（保证金水平低于 50%）",
+    ),
+    "demo.err.lot": L(
+        "Choose one of the fixed lot sizes.",
+        "Pilih salah satu saiz lot tetap.",
+        "நிலையான லாட் அளவுகளில் ஒன்றைத் தேர்ந்தெடுக்கவும்.",
+        "请选择一个固定手数。",
+    ),
+    "demo.err.side": L(
+        "Choose buy or sell.",
+        "Pilih beli atau jual.",
+        "வாங்கு அல்லது விற்கு என்பதைத் தேர்ந்தெடுக்கவும்.",
+        "请选择买入或卖出。",
+    ),
+    "demo.err.margin": L(
+        "Not enough free margin: need {need}, have {have}.",
+        "Margin bebas tidak mencukupi: perlu {need}, ada {have}.",
+        "போதுமான இலவச மார்ஜின் இல்லை: தேவை {need}, உள்ளது {have}.",
+        "可用保证金不足：需要 {need}，可用 {have}。",
+    ),
+    "col.instrument": L("Instrument", "Instrumen", "கருவி", "品种"),
+    "col.side": L("Side", "Arah", "திசை", "方向"),
+    "col.lots": L("Lots", "Lot", "லாட்", "手数"),
+    "calc.caption": L(
+        "Work out the lot size before you trade. Uses the same contract sizes as the demo account.",
+        "Kira saiz lot sebelum berdagang. Menggunakan saiz kontrak yang sama seperti akaun demo.",
+        "வர்த்தகம் செய்வதற்கு முன் லாட் அளவைக் கணக்கிடுங்கள். டெமோ கணக்கின் அதே ஒப்பந்த அளவுகள்.",
+        "交易前先算好手数。合约规格与模拟账户相同。",
+    ),
+    "calc.account_type": L("Account type", "Jenis akaun", "கணக்கு வகை", "账户类型"),
+    "calc.balance": L("Account balance", "Baki akaun", "கணக்கு இருப்பு", "账户余额"),
+    "calc.risk": L(
         "Risk per trade (%)", "Risiko setiap dagangan (%)", "ஒரு வர்த்தக இடர் (%)", "单笔风险 (%)"
     ),
-    "sizer.atr_mult": L("ATR multiplier", "Pengganda ATR", "ATR பெருக்கி", "ATR 倍数"),
-    "sizer.win_rate": L("Win rate (0–1)", "Kadar menang (0–1)", "வெற்றி விகிதம் (0–1)", "胜率 (0–1)"),
-    "sizer.avg_win": L(
-        "Average win (R or $)",
-        "Purata menang (R atau $)",
-        "சராசரி வெற்றி (R அல்லது $)",
-        "平均盈利 (R 或 $)",
+    "calc.entry": L("Entry price", "Harga masuk", "நுழைவு விலை", "入场价"),
+    "calc.stop": L("Stop-loss price", "Harga henti rugi", "நிறுத்த இழப்பு விலை", "止损价"),
+    "calc.stop_pips": L("Stop distance", "Jarak henti rugi", "நிறுத்த தூரம்", "止损距离"),
+    "calc.pip_value": L(
+        "Pip value per 0.01 lot",
+        "Nilai pip setiap 0.01 lot",
+        "0.01 லாட்டுக்கான பிப் மதிப்பு",
+        "每 0.01 手点值",
     ),
-    "sizer.avg_loss": L(
-        "Average loss (R or $)",
-        "Purata rugi (R atau $)",
-        "சராசரி இழப்பு (R அல்லது $)",
-        "平均亏损 (R 或 $)",
+    "calc.exact": L("Exact lot", "Lot tepat", "துல்லியமான லாட்", "精确手数"),
+    "calc.fixed": L(
+        "Fixed lot to use", "Lot tetap untuk digunakan", "பயன்படுத்த வேண்டிய நிலையான லாட்", "建议固定手数"
     ),
-    "sizer.kelly_convert": L(
-        "Convert to shares (needs entry & stop)",
-        "Tukar kepada saham (perlu harga masuk & henti rugi)",
-        "பங்குகளாக மாற்றவும் (நுழைவும் நிறுத்தமும் தேவை)",
-        "换算为股数（需要入场价和止损价）",
+    "calc.risk_at": L("Risk at that lot", "Risiko pada lot itu", "அந்த லாட்டில் இடர்", "该手数的风险"),
+    "calc.margin": L(
+        "Margin needed (1:{lev})",
+        "Margin diperlukan (1:{lev})",
+        "தேவையான மார்ஜின் (1:{lev})",
+        "所需保证金 (1:{lev})",
     ),
-    "sizer.constraints": L(
-        "Portfolio constraints (optional)",
-        "Had portfolio (pilihan)",
-        "போர்ட்ஃபோலியோ வரம்புகள் (விருப்பம்)",
-        "组合约束（可选）",
+    "calc.none": L(
+        "Even 0.01 lot is above your risk. Try a cent account or a closer stop.",
+        "Malah 0.01 lot melebihi risiko anda. Cuba akaun cent atau henti rugi lebih dekat.",
+        "0.01 லாட் கூட உங்கள் இடருக்கு மேல். சென்ட் கணக்கு அல்லது நெருக்கமான நிறுத்தத்தை முயலுங்கள்.",
+        "即使 0.01 手也超出你的风险。可尝试美分账户或更近的止损。",
     ),
-    "sizer.max_pos": L(
-        "Max position (% of account)",
-        "Posisi maks (% akaun)",
-        "அதிகபட்ச நிலை (கணக்கின் %)",
-        "最大仓位（占账户 %）",
+    "calc.table": L(
+        "All fixed lot sizes", "Semua saiz lot tetap", "அனைத்து நிலையான லாட் அளவுகள்", "所有固定手数"
     ),
-    "sizer.max_sector": L(
-        "Max sector (%)", "Sektor maks (%)", "அதிகபட்சத் துறை (%)", "最大行业占比 (%)"
+    "calc.ok": L("Within limit", "Dalam had", "வரம்புக்குள்", "在限额内"),
+    "calc.col_risk_pct": L("Risk %", "% risiko", "இடர் %", "风险 %"),
+    "calc.col_risk": L("Risk", "Risiko", "இடர்", "风险"),
+    "calc.col_margin": L("Margin", "Margin", "மார்ஜின்", "保证金"),
+    "calc.col_ok": L("OK?", "OK?", "சரியா?", "可行？"),
+    "home.desc.chart": L(
+        "Candles, SMA 20/50/200, RSI and ATR for every instrument.",
+        "Lilin, SMA 20/50/200, RSI dan ATR untuk setiap instrumen.",
+        "ஒவ்வொரு கருவிக்கும் மெழுகுவர்த்திகள், SMA 20/50/200, RSI மற்றும் ATR.",
+        "所有品种的K线、SMA 20/50/200、RSI 和 ATR。",
     ),
-    "sizer.sector": L("Sector", "Sektor", "துறை", "行业"),
-    "sizer.cur_sector": L(
-        "Current sector exposure (%)",
-        "Pendedahan sektor semasa (%)",
-        "தற்போதைய துறை வெளிப்பாடு (%)",
-        "当前行业敞口 (%)",
+    "replay.intro": L(
+        "A random instrument is shown up to a hidden point in the past. Decide: buy or sell with "
+        "a stop and target, or skip. Then the next {h} days are revealed. The name and dates are "
+        "hidden so you judge the chart, not the name.",
+        "Instrumen rawak ditunjukkan sehingga satu titik tersembunyi pada masa lalu. Buat "
+        "keputusan: beli atau jual dengan henti rugi dan sasaran, atau langkau. Kemudian {h} hari "
+        "seterusnya didedahkan. Nama dan tarikh disembunyikan supaya anda menilai carta, bukan nama.",
+        "ஒரு சீரற்ற கருவி கடந்த காலத்தின் மறைக்கப்பட்ட புள்ளி வரை காட்டப்படும். முடிவு "
+        "செய்யுங்கள்: நிறுத்தம் மற்றும் இலக்குடன் வாங்கு அல்லது விற்கு, அல்லது தவிர். பின் அடுத்த "
+        "{h} நாட்கள் வெளிப்படுத்தப்படும். பெயரை அல்ல, விளக்கப்படத்தை மதிப்பிட பெயரும் தேதிகளும் "
+        "மறைக்கப்படும்.",
+        "系统随机显示一个品种截至过去某个隐藏时点的走势。请决定：设好止损和目标后买入或卖出，"
+        "或者跳过。随后揭晓接下来 {h} 天的走势。品种名称和日期都被隐藏，让你只看图表、不看名字。",
     ),
-    "sizer.fractional": L(
-        "Allow fractional shares",
-        "Benarkan saham pecahan",
-        "பகுதிப் பங்குகளை அனுமதிக்கவும்",
-        "允许零碎股",
+    "demo.setup": L(
+        "Start a demo account with virtual money. Prices are real daily closes.",
+        "Mulakan akaun demo dengan wang maya. Harga ialah harga tutup harian sebenar.",
+        "மெய்நிகர் பணத்துடன் டெமோ கணக்கைத் தொடங்குங்கள். விலைகள் உண்மையான தினசரி முடிவு விலைகள்.",
+        "用虚拟资金开设模拟账户。价格为真实的每日收盘价。",
     ),
-    "sizer.calculate": L("Calculate", "Kira", "கணக்கிடு", "计算"),
-    "sizer.invalid": L(
-        "Invalid input: {err}", "Input tidak sah: {err}", "தவறான உள்ளீடு: {err}", "输入无效：{err}"
+    "demo.err.risk": L(
+        "Trade risk {pct}% exceeds your level's limit of {limit}%. Choose a smaller lot or move "
+        "the stop closer.",
+        "Risiko dagangan {pct}% melebihi had tahap anda {limit}%. Pilih lot lebih kecil atau "
+        "dekatkan henti rugi.",
+        "வர்த்தக இடர் {pct}% உங்கள் நிலையின் {limit}% வரம்பை மீறுகிறது. சிறிய லாட்டைத் "
+        "தேர்ந்தெடுக்கவும் அல்லது நிறுத்தத்தை நெருக்கவும்.",
+        "该交易风险 {pct}% 超过你当前级别 {limit}% 的上限。请选择更小的手数或把止损移近。",
     ),
-    "sizer.budget": L(
-        "Risk budget (half Kelly)",
-        "Bajet risiko (separuh Kelly)",
-        "இடர் பட்ஜெட் (அரை Kelly)",
-        "风险预算（半凯利）",
-    ),
-    "sizer.pct_acct": L(
-        "{pct}% of account", "{pct}% daripada akaun", "கணக்கின் {pct}%", "占账户 {pct}%"
-    ),
-    "sizer.full_kelly": L("Full Kelly", "Kelly penuh", "முழு Kelly", "全凯利"),
-    "sizer.pos_value": L("Position value", "Nilai posisi", "நிலை மதிப்பு", "持仓价值"),
-    "sizer.risk_usd": L("Risk ($)", "Risiko ($)", "இடர் ($)", "风险 ($)"),
-    "sizer.risk_acct": L(
-        "Risk (% of account)", "Risiko (% akaun)", "இடர் (கணக்கின் %)", "风险（占账户 %）"
-    ),
-    "sizer.stop_used": L(
-        "**Stop:** {stop}", "**Henti rugi:** {stop}", "**நிறுத்தம்:** {stop}", "**止损：**{stop}"
-    ),
-    "sizer.binding": L(
-        "Limited by constraint: **{name}**",
-        "Dihadkan oleh: **{name}**",
-        "வரம்பால் கட்டுப்படுத்தப்பட்டது: **{name}**",
-        "受以下约束限制：**{name}**",
-    ),
-    "sizer.report": L(
-        "Full report (English)",
-        "Laporan penuh (Bahasa Inggeris)",
-        "முழு அறிக்கை (ஆங்கிலம்)",
-        "完整报告（英文）",
-    ),
-    "sizer.download": L(
-        "Download report (.md)",
-        "Muat turun laporan (.md)",
-        "அறிக்கையைப் பதிவிறக்கவும் (.md)",
-        "下载报告 (.md)",
-    ),
-    # ------------------------------------------------------------------ market breadth
-    "breadth.caption": L(
-        "Runs skills/market-breadth-analyzer on public CSV data — no API key.",
-        "Menjalankan skills/market-breadth-analyzer pada data CSV awam — tanpa kunci API.",
-        "பொது CSV தரவில் skills/market-breadth-analyzer ஐ இயக்குகிறது — API விசை தேவையில்லை.",
-        "基于公开 CSV 数据运行 skills/market-breadth-analyzer——无需 API 密钥。",
-    ),
-    "breadth.run": L("Run analysis", "Jalankan analisis", "பகுப்பாய்வை இயக்கவும்", "运行分析"),
-    "breadth.spinner": L(
-        "Fetching breadth data and scoring…",
-        "Mengambil data dan mengira skor…",
-        "தரவைப் பெற்று மதிப்பிடுகிறது…",
-        "正在获取数据并评分……",
-    ),
-    "breadth.failed": L(
-        "Analyzer failed: {err}",
-        "Penganalisis gagal: {err}",
-        "பகுப்பாய்வி தோல்வியடைந்தது: {err}",
-        "分析失败：{err}",
-    ),
-    "breadth.saved": L(
-        "Showing the latest saved report. Click **Run analysis** to refresh.",
-        "Memaparkan laporan terakhir yang disimpan. Klik **Jalankan analisis** untuk mengemas kini.",
-        "கடைசியாகச் சேமித்த அறிக்கை காட்டப்படுகிறது. புதுப்பிக்க **பகுப்பாய்வை இயக்கவும்** கிளிக் செய்யவும்.",
-        "显示最近保存的报告。点击**运行分析**以刷新。",
-    ),
-    "breadth.none": L(
-        "No report yet — click **Run analysis**.",
-        "Belum ada laporan — klik **Jalankan analisis**.",
-        "இன்னும் அறிக்கை இல்லை — **பகுப்பாய்வை இயக்கவும்** கிளிக் செய்யவும்.",
-        "尚无报告——请点击**运行分析**。",
-    ),
-    "breadth.exposure": L(
-        "Equity exposure guidance",
-        "Panduan pendedahan ekuiti",
-        "பங்கு வெளிப்பாடு வழிகாட்டல்",
-        "股票仓位建议",
-    ),
-    "breadth.strongest": L("Strongest", "Paling kuat", "வலிமையானது", "最强"),
-    "breadth.weakest": L("Weakest", "Paling lemah", "பலவீனமானது", "最弱"),
-    "breadth.latest": L(
-        "Latest data: {date} · generated {gen}",
-        "Data terkini: {date} · dijana {gen}",
-        "சமீபத்திய தரவு: {date} · உருவாக்கப்பட்டது {gen}",
-        "最新数据：{date} · 生成于 {gen}",
-    ),
-    "breadth.components": L("Components", "Komponen", "கூறுகள்", "分项"),
-    "breadth.levels": L(
-        "Key levels to watch",
-        "Paras penting untuk diperhati",
-        "கவனிக்க வேண்டிய முக்கிய நிலைகள்",
-        "需关注的关键水平",
-    ),
-    "breadth.saved_to": L(
-        "Reports saved to {path}. Signal text comes from the skill in English.",
-        "Laporan disimpan di {path}. Teks isyarat datang daripada skill dalam Bahasa Inggeris.",
-        "அறிக்கைகள் {path} இல் சேமிக்கப்பட்டன. சமிக்ஞை உரை திறனிலிருந்து ஆங்கிலத்தில் வருகிறது.",
-        "报告保存在 {path}。信号文字由技能以英文生成。",
-    ),
-    # ------------------------------------------------------------------ catalog
-    "catalog.search": L("Search", "Cari", "தேடல்", "搜索"),
-    "catalog.placeholder": L(
-        "e.g. dividend, breakout, earnings",
-        "cth. dividend, breakout, earnings",
-        "எ.கா. dividend, breakout, earnings",
-        "例如 dividend、breakout、earnings",
-    ),
-    "catalog.category": L("Category", "Kategori", "வகை", "类别"),
-    "catalog.api": L("API requirement", "Keperluan API", "API தேவை", "API 需求"),
-    "catalog.count": L(
-        "{n} of {total} skills · descriptions are in English",
-        "{n} daripada {total} skill · penerangan dalam Bahasa Inggeris",
-        "{total} இல் {n} திறன்கள் · விளக்கங்கள் ஆங்கிலத்தில்",
-        "{total} 个技能中的 {n} 个 · 描述为英文",
-    ),
-    "catalog.meta": L(
-        "Status: {status} · Timeframe: {tf} · Difficulty: {diff} · {api}",
-        "Status: {status} · Jangka masa: {tf} · Kesukaran: {diff} · {api}",
-        "நிலை: {status} · காலவரம்பு: {tf} · சிரமம்: {diff} · {api}",
-        "状态：{status} · 周期：{tf} · 难度：{diff} · {api}",
-    ),
-    "catalog.integrations": L("Integrations", "Integrasi", "ஒருங்கிணைப்புகள்", "集成"),
-    "api.none": L("No paid API", "Tiada API berbayar", "கட்டண API இல்லை", "无需付费 API"),
-    "api.optional": L(
-        "Paid API optional", "API berbayar pilihan", "கட்டண API விருப்பம்", "付费 API 可选"
-    ),
-    "api.required": L(
-        "Paid API required", "API berbayar diperlukan", "கட்டண API தேவை", "需要付费 API"
-    ),
-    "cat.market-regime": L("Market Regime", "Rejim Pasaran", "சந்தை நிலை", "市场状态"),
-    "cat.core-portfolio": L("Core Portfolio", "Portfolio Teras", "முக்கிய போர்ட்ஃபோலியோ", "核心组合"),
-    "cat.dividend-income": L(
-        "Dividend Income", "Pendapatan Dividen", "ஈவுத்தொகை வருமானம்", "股息收入"
-    ),
-    "cat.swing-opportunity": L("Swing Opportunity", "Peluang Swing", "ஸ்விங் வாய்ப்பு", "波段机会"),
-    "cat.trade-planning": L(
-        "Trade Planning", "Perancangan Dagangan", "வர்த்தகத் திட்டமிடல்", "交易计划"
-    ),
-    "cat.trade-memory": L("Trade Memory", "Memori Dagangan", "வர்த்தக நினைவகம்", "交易记录"),
-    "cat.strategy-research": L(
-        "Strategy Research", "Penyelidikan Strategi", "உத்தி ஆராய்ச்சி", "策略研究"
-    ),
-    "cat.advanced-satellite": L(
-        "Advanced Satellite", "Satelit Lanjutan", "மேம்பட்ட துணை", "进阶卫星策略"
-    ),
-    "cat.meta": L("Meta", "Meta", "மெட்டா", "元技能"),
 }
 
 

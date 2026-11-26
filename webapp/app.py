@@ -1,4 +1,4 @@
-"""Trading Skills Web App — Streamlit entry point.
+"""Forex Trading Trainer — Streamlit entry point.
 
 Run from the repository root:
     streamlit run webapp/app.py
@@ -12,8 +12,7 @@ import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from views import (  # noqa: E402
-    breadth_page,
-    catalog_page,
+    calc_page,
     chart_page,
     demo_page,
     home_page,
@@ -21,7 +20,6 @@ from views import (  # noqa: E402
     learn_page,
     nav,
     replay_page,
-    sizer_page,
 )
 from views.lang import t  # noqa: E402
 from views.state import level_info  # noqa: E402
@@ -52,9 +50,7 @@ sections = {
     ],
     t("nav.tools"): [
         page(chart_page.render, "chart", "📊"),
-        page(sizer_page.render, "sizer", "🧮"),
-        page(breadth_page.render, "breadth", "🌡️"),
-        page(catalog_page.render, "catalog", "📚"),
+        page(calc_page.render, "calc", "🧮"),
     ],
 }
 navigation = st.navigation(sections)
