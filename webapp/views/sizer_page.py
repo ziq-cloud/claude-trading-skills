@@ -19,7 +19,7 @@ def render():
         horizontal=True,
     )
 
-    with st.form("sizer"):
+    with st.form("sizer_form"):
         c1, c2, c3 = st.columns(3)
         account = c1.number_input("Account size ($)", min_value=1.0, value=100_000.0, step=1000.0)
         entry = stop = risk_pct = atr = win_rate = avg_win = avg_loss = None

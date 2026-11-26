@@ -2,14 +2,20 @@ import streamlit as st
 from core import catalog
 
 from views import nav
+from views.state import level_info
 
 
 def render():
     st.title("📈 Trading Skills")
     st.write(
-        "A web front end for the skills in this repository. "
-        "Each tool here calls the same Python scripts the Claude skills use."
+        "Learn to trade step by step, from zero to an advanced, rule-based process, "
+        "with virtual money first. The tools use the same Python scripts as the Claude skills."
     )
+    level, info, _, _ = level_info()
+    with st.container(border=True):
+        st.markdown(f"**You are at Level {level}: {info['name']}**: {info['goal']}")
+        st.caption(f"Next: {info['unlock']}")
+        st.page_link(nav.PAGES["learn"], label="Continue on the Learning Path →", icon="🎓")
     skills = catalog.load_skills()
     free = sum(1 for s in skills if s.api_level == "none")
     c1, c2, c3 = st.columns(3)
@@ -20,6 +26,8 @@ def render():
     st.subheader("Tools")
     cols = st.columns(2)
     tools = [
+        ("replay", "⏪ Chart Replay", "Practise entries on hidden historical charts."),
+        ("demo", "💼 Demo Account", "Paper trade with virtual money on real prices."),
         ("chart", "📊 Price Chart", "Candles, SMA 20/50/200, RSI and ATR for any ticker."),
         ("sizer", "🧮 Position Sizer", "Risk-based share count: fixed %, ATR or Kelly."),
         ("breadth", "🌡️ Market Breadth", "0–100 breadth health score from public CSV data."),
@@ -31,6 +39,6 @@ def render():
             st.caption(desc)
 
     st.info(
-        "Suggested flow: check **Market Breadth** for the overall regime → look at a "
-        "ticker in **Price Chart** → send its ATR to the **Position Sizer** to get a share count."
+        "Path: **Learning Path** (lessons + quiz) → **Chart Replay** (10 practice trades) → "
+        "**Demo Account** (10 paper trades with positive expectancy) → Advanced tools."
     )

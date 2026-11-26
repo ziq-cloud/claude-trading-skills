@@ -1,7 +1,29 @@
 # Trading Skills Web App
 
-A Streamlit web front end for the skills in this repository. Each page calls the
-same Python code the Claude skills use, so the numbers match the CLI output.
+A Streamlit app that takes a trader from zero to an advanced, rule-based process,
+with virtual money first. The tool pages call the same Python code the Claude skills
+use, so the numbers match the CLI output.
+
+## Training (zero → advanced)
+
+| Level | Focus | Unlocks when | Max risk / demo trade |
+|-------|-------|--------------|-----------------------|
+| 1 Beginner | Candles, trend, support/resistance, stop-loss, 1% rule | Basics quiz ≥ 80% | 0.5% |
+| 2 Risk Control | R-multiples, reward:risk, position sizing | 10 Chart Replay trades | 1% |
+| 3 Trend & Context | Market breadth, RSI/ATR, expectancy | 10 closed demo trades with positive expectancy | 1% |
+| 4 Advanced | Screeners and setups from the skill catalog | (top level) | 2% |
+
+| Page | What it does |
+|------|--------------|
+| 🎓 Learning Path | Lessons per level, quiz, progress toward the next level |
+| ⏪ Chart Replay | A random stock (ticker and dates hidden) stops at a past date; buy with stop/target or skip, then the next 20 days are revealed and scored in R |
+| 💼 Demo Account | Paper trading on real daily prices. Long only, stop-loss and a written reason required, risk capped by level, pre-trade checklist, stops/targets auto-checked on each new daily bar, journal and equity curve |
+
+Progress and the demo account are stored locally in `state/webapp/` (git-ignored).
+Replay fills are conservative: gaps through the stop fill at the open, and a bar that
+touches both stop and target counts as a stop.
+
+## Tools
 
 | Page | What it does | Skill / data source | API key |
 |------|--------------|---------------------|---------|
@@ -40,6 +62,8 @@ webapp/
 │   ├── catalog.py    # skills-index.yaml loader + filters
 │   ├── sizing.py     # position-sizer skill wrapper
 │   ├── breadth.py    # market-breadth-analyzer runner + report parser
+│   ├── training.py   # levels, lessons, quiz, replay scoring, progress
+│   ├── demo_account.py # paper-trading ledger and risk rules
 │   ├── prices.py     # Twelve Data / yfinance OHLCV fetch
 │   └── indicators.py # SMA, RSI, ATR
 ├── views/            # One module per page
